@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'sign_up.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SignUp extends StatelessWidget {
+  const SignUp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class LoginScreen extends StatelessWidget {
                 // Email Field
                 TextField(
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    labelText: 'Enter your email',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -38,7 +38,22 @@ class LoginScreen extends StatelessWidget {
                 // Password Field
                 TextField(
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    labelText: 'Enter a password',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  obscureText: true,
+                ),
+                  const SizedBox(height: 20),
+
+                
+
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -66,7 +81,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Login',
+                    'Sign Up',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
@@ -75,26 +90,24 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 100),
+                const SizedBox(height: 50),
 
                 // Don't have an account? Sign Up!
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Don't have an account? ",
+                      "Have an account? ",
                       style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
                     GestureDetector(
                       onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>const SignUp()),
-                          );
-                        print("Navigate to Sign Up page");
+                        Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen())
+                        );
                       },
                       child: const Text(
-                        "Sign Up!",
+                        "Log In!",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
