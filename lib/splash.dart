@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});
@@ -17,7 +18,7 @@ class _SplashState extends State<Splash> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const MyHomePage(title: 'Skin Muse Home'),
+         builder: (context) => const LoginScreen(),
         ),
       );
     });
