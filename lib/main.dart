@@ -3,6 +3,7 @@ import 'package:skin_muse/dashboard_screen.dart';
 import 'splash.dart';
 import 'login_screen.dart';
 import 'sign_up.dart';
+import 'dashboard_screen.dart';
 
  // Make sure the import is correct
 
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Splash(), //splash screen
+      home: DashboardScreen(), //splash screen
     );
   }
 }

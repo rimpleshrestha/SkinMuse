@@ -9,11 +9,11 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFEDF5),
       appBar: AppBar(
         backgroundColor: const Color(0xFFA55166),
-        title: const Text('Dashboard'),
+        title: const Text('SkinMuse'),
       ),
       body: const Center(
         child: Text(
-          'Welcome to home screen !',
+          'Welcome to home SkinMuse!',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
