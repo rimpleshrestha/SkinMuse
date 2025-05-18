@@ -1,8 +1,41 @@
 import 'package:flutter/material.dart';
+import 'dashboard_screen.dart'; // Ensure this file exists
 import 'sign_up.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+
+  void _login() {
+    const correctEmail = 'admin@gmail.com';
+    const correctPassword = '123456';
+
+    if (_email.text.trim() == correctEmail &&
+        _password.text == correctPassword) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Wrong credentials')));
+    }
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,61 +48,82 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo or title
+                // Logo
                 Image.asset('assets/skinmuselogo.png', height: 300),
-
                 const SizedBox(height: 24),
 
                 // Email Field
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(30),
+                  child: TextField(
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
                 ),
 
                 const SizedBox(height: 20),
 
                 // Password Field
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(30),
+                  child: TextField(
+                    controller: _password,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                  obscureText: true,
                 ),
 
                 const SizedBox(height: 32),
 
-                // Login Button
+                // Login Button with thick colored border
                 ElevatedButton(
-                  onPressed: () {
-                    // Add login logic
-                  },
+                  onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
                       vertical: 14,
                     ),
-                    backgroundColor: const Color(0xFFA55166),
+                    backgroundColor: const Color(0xFFFAF9F9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
+                      side: const BorderSide(
+                        color: Color(0xFFA55166),
+                        width: 2, // Thicker border
+                      ),
                     ),
                   ),
                   child: const Text(
                     'Login',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.white,
+                      color: Color(0xFFA55166),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -77,7 +131,7 @@ class LoginScreen extends StatelessWidget {
 
                 const SizedBox(height: 100),
 
-                // Don't have an account? Sign Up!
+                // Sign Up Text
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -87,11 +141,10 @@ class LoginScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) =>const SignUp()),
-                          );
-                        print("Navigate to Sign Up page");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SignUp()),
+                        );
                       },
                       child: const Text(
                         "Sign Up!",

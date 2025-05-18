@@ -15,84 +15,109 @@ class SignUp extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo or title
                 Image.asset('assets/skinmuselogo.png', height: 300),
-
                 const SizedBox(height: 24),
 
                 // Email Field
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Enter your email',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(30),
+                  child: TextField(
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your email',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                  keyboardType: TextInputType.emailAddress,
                 ),
-
                 const SizedBox(height: 20),
 
                 // Password Field
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Enter a password',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(30),
+                  child: TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Enter a password',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                  obscureText: true,
                 ),
-                  const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                
-
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                // Confirm Password Field
+                Material(
+                  elevation: 2,
+                  borderRadius: BorderRadius.circular(30),
+                  child: TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Confirm password',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 18,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
-                  obscureText: true,
                 ),
-
                 const SizedBox(height: 32),
 
-                // Login Button
+                // Sign‑Up Button (white with thick colored border)
                 ElevatedButton(
                   onPressed: () {
-                    // Add login logic
+                    // Add sign‑up logic
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 32,
                       vertical: 14,
                     ),
-                    backgroundColor: const Color(0xFFA55166),
+                    backgroundColor: const Color(0xFFFAF9F9),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
+                      side: const BorderSide(
+                        color: Color(0xFFA55166),
+                        width: 2,
+                      ),
                     ),
                   ),
                   child: const Text(
                     'Sign Up',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.white,
+                      color: Color(0xFFA55166),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 50),
 
-                // Don't have an account? Sign Up!
+                // Navigate back to Login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -102,8 +127,11 @@ class SignUp extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen())
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
                         );
                       },
                       child: const Text(
