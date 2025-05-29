@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:skin_muse/dashboard_screen.dart';
 import 'splash.dart';
 import 'login_screen.dart';
 import 'sign_up.dart';
+
  // Make sure the import is correct
 
 void main() {
@@ -15,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Splash(), //splash screen
+      home: DashboardScreen(), //splash screen
     );
   }
 }

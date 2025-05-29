@@ -22,3 +22,11 @@ flutter:
 
   assets:
     - assets/skinmuselogo.png
+
+  fonts:
+    - family: Inter_Bold
+      fonts:
+        - asset: assets/fonts/inter_bold.ttf
+    - family: Inter_Light
+      fonts:
+        - asset: assets/fonts/inter_light.ttf
