@@ -17,7 +17,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     const activeColor = Color(0xFFA55166);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFEDF5),
       appBar: AppBar(
         backgroundColor: Color(0xFFFFEDF5),
         title: const Text('SkinMuse'),
