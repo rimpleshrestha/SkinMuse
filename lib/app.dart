@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skin_muse/views/dashboard_screen.dart';
-import 'package:skin_muse/views/splash.dart';
+
 
 
 class App extends StatelessWidget {

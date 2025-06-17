@@ -114,7 +114,6 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
-    super.key,
   });
 
   @override
