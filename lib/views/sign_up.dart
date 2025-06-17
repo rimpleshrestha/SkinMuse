@@ -124,3 +124,5 @@ class SignUp extends StatelessWidget {
     );
   }
 }
+
+//sign up adds user to the databse
