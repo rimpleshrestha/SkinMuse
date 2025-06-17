@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skin_muse/views/dashboard_screen.dart';
+import 'package:skin_muse/views/splash.dart';
 
 
 
@@ -14,7 +15,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         scaffoldBackgroundColor: Color(0xFFFFEDF5), // global soft pink
       ),
-      home: const DashboardScreen(),
+      home: const Splash(),
     );
   }
 }
