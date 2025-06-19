@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 
 class LoginViewModel extends ChangeNotifier {
   String _email = '';
@@ -10,7 +12,7 @@ class LoginViewModel extends ChangeNotifier {
   String get password => _password;
   bool get isLoading => _isLoading;
 
-  // Setters with notifyListeners
+  // Setters
   void setEmail(String email) {
     _email = email;
     notifyListeners();
@@ -21,22 +23,20 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Simulate login function
-  Future<bool> login() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<UserHiveModel?> validateUser() async {
+    final userBox = await Hive.openBox<UserHiveModel>('users');
 
-    await Future.delayed(const Duration(seconds: 2)); // simulate network delay
-
-    _isLoading = false;
-    notifyListeners();
-
-    // Here add your actual login logic
-    // Return true if login success, else false
-    if (_email == 'test@example.com' && _password == '123456') {
-      return true;
-    } else {
-      return false;
+    for (var u in userBox.values) {
+      if (u.email == _email && u.password == _password) {
+        return u; // Return the found user
+      }
     }
+
+    return null; // Return null if not found
+  }
+
+  void setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
   }
 }

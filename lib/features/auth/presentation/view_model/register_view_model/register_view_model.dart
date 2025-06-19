@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 
 class RegisterViewModel extends ChangeNotifier {
   String _email = '';
@@ -28,17 +30,55 @@ class RegisterViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Simulated register function
   Future<bool> register() async {
+    print('Register started for email: $_email');
+
     _isLoading = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 1));
+
+    final isValid = _password == _confirmPassword && _email.isNotEmpty;
+    if (!isValid) {
+      print('Validation failed: passwords do not match or email empty');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final userBox = await Hive.openBox<UserHiveModel>('users');
+
+    UserHiveModel? existingUser;
+    for (var user in userBox.values) {
+      if (user.email == _email) {
+        existingUser = user;
+        break;
+      }
+    }
+
+    if (existingUser != null) {
+      print('User already exists with email $_email');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+
+    final newUser = UserHiveModel(
+      firstName: '',
+      lastName: '',
+      phone: '',
+      email: _email,
+      username: _email.split('@')[0],
+      password: _password,
+    );
+
+    await userBox.add(newUser);
+
+    print('User registered successfully: $_email');
 
     _isLoading = false;
     notifyListeners();
 
-    // Basic password match check (replace with real logic later)
-    return _password == _confirmPassword && _email.isNotEmpty;
+    return true;
   }
 }
