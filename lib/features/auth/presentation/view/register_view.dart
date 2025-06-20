@@ -27,7 +27,22 @@ class RegisterView extends StatelessWidget {
                 builder: (context, viewModel, _) {
                   return BlocConsumer<RegisterBloc, RegisterState>(
                     listener: (context, state) {
-                      if (state.isSuccess) {
+                      if (viewModel.password != viewModel.confirmPassword) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Passwords should match"),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      } else if (state.isSuccess) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Successfully registered"),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
                         Navigator.pushReplacementNamed(context, '/login');
                       }
                     },
@@ -37,12 +52,8 @@ class RegisterView extends StatelessWidget {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Logo or title
                           Image.asset('assets/skinmuselogo.png', height: 300),
-
                           const SizedBox(height: 24),
-
-                          // Email TextField
                           TextField(
                             decoration: InputDecoration(
                               labelText: 'Enter your email',
@@ -55,10 +66,7 @@ class RegisterView extends StatelessWidget {
                             keyboardType: TextInputType.emailAddress,
                             onChanged: viewModel.setEmail,
                           ),
-
                           const SizedBox(height: 20),
-
-                          // Password TextField
                           TextField(
                             decoration: InputDecoration(
                               labelText: 'Enter a password',
@@ -71,10 +79,7 @@ class RegisterView extends StatelessWidget {
                             obscureText: true,
                             onChanged: viewModel.setPassword,
                           ),
-
                           const SizedBox(height: 20),
-
-                          // Confirm Password TextField
                           TextField(
                             decoration: InputDecoration(
                               labelText: 'Confirm Password',
@@ -87,10 +92,7 @@ class RegisterView extends StatelessWidget {
                             obscureText: true,
                             onChanged: viewModel.setConfirmPassword,
                           ),
-
                           const SizedBox(height: 32),
-
-                          // Sign Up Button
                           ElevatedButton(
                             onPressed:
                                 state.isLoading
@@ -130,10 +132,7 @@ class RegisterView extends StatelessWidget {
                                       ),
                                     ),
                           ),
-
                           const SizedBox(height: 50),
-
-                          // Login redirect text
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

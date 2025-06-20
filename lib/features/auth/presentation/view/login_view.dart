@@ -28,6 +28,12 @@ class LoginView extends StatelessWidget {
                   return BlocConsumer<LoginCubit, LoginState>(
                     listener: (context, state) {
                       if (state.status == LoginStatus.success) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Successfully logged in"),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -40,7 +46,10 @@ class LoginView extends StatelessWidget {
                         );
                       } else if (state.status == LoginStatus.failure) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Wrong credentials")),
+                          const SnackBar(
+                            content: Text("Wrong credentials"),
+                            backgroundColor: Colors.red,
+                          ),
                         );
                       }
                     },
