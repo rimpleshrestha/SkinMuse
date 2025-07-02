@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
 
@@ -19,6 +20,7 @@ class LoginState {
 
 class LoginCubit extends Cubit<LoginState> {
   final LoginViewModel viewModel;
+  final AuthRemoteDataSource _authRemoteDataSource = AuthRemoteDataSource();
 
   LoginCubit({required this.viewModel}) : super(LoginState.initial());
 
@@ -26,11 +28,25 @@ class LoginCubit extends Cubit<LoginState> {
     emit(LoginState.loading());
     viewModel.setLoading(true);
 
-    final user = await viewModel.validateUser();
+    final response = await _authRemoteDataSource.login(
+      viewModel.email,
+      viewModel.password,
+    );
 
     viewModel.setLoading(false);
 
-    if (user != null) {
+    if (response != null) {
+      // Map the response data to UserHiveModel
+      final user = UserHiveModel(
+        firstName: response['firstName'] ?? '',
+        lastName: response['lastName'] ?? '',
+        phone: response['phone'] ?? '',
+        profileImage: response['profileImage'],
+        email: response['email'] ?? '',
+        username: response['username'] ?? '',
+        password: '', // Do not store password from response
+      );
+
       emit(LoginState.success(user));
     } else {
       emit(LoginState.failure());

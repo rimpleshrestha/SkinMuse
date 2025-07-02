@@ -1,29 +1,45 @@
-// import 'package:dio/dio.dart';
-// import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-// import 'package:student_management/app/constant/api_endpoints.dart';
-// import 'package:student_management/core/network/dio_error_interceptor.dart';
+import 'package:dio/dio.dart';
 
-// class ApiService {
-//   final Dio _dio;
+class ApiService {
+  static final Dio dio = Dio(
+    BaseOptions(
+      baseUrl:
+          'http://10.0.2.2:3000/api', // For Android Emulator, backend running on port 3000
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    ),
+  );
 
-//   Dio get dio => _dio;
+  /// Register user API call
+  static Future<bool> registerUser({
+    required String email,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/signup',
+        data: {
+          'email': email,
+          'password': password,
+          'confirm_password': confirmPassword,
+        },
+      );
 
-//   ApiService(this._dio) {
-//     _dio
-//       ..options.baseUrl = ApiEndpoints.baseUrl
-//       ..options.connectTimeout = ApiEndpoints.connectionTimeout
-//       ..options.receiveTimeout = ApiEndpoints.receiveTimeout
-//       ..interceptors.add(DioErrorInterceptor())
-//       ..interceptors.add(
-//         PrettyDioLogger(
-//           requestHeader: true,
-//           requestBody: true,
-//           responseHeader: true,
-//         ),
-//       )
-//       ..options.headers = {
-//         'Accept': 'application/json',
-//         'Content-Type': 'application/json',
-//       };
-//   }
-// }
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print('Registration successful: ${response.data}');
+        return true;
+      } else {
+        print('Registration failed: ${response.data}');
+        return false;
+      }
+    } catch (e) {
+      print('Error during registration: $e');
+      return false;
+    }
+  }
+}

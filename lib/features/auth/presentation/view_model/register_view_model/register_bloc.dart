@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'register_event.dart';
 import 'register_state.dart';
 import '../../view_model/register_view_model/register_view_model.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final RegisterViewModel viewModel;
+  final AuthRemoteDataSource _authRemoteDataSource = AuthRemoteDataSource();
 
   RegisterBloc({required this.viewModel})
     : super(const RegisterState.initial()) {
@@ -23,21 +25,31 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     viewModel.setPassword(event.password);
     viewModel.setConfirmPassword(event.confirmPassword);
 
-    final success = await viewModel.register();
+    if (event.password != event.confirmPassword) {
+      emit(state.copyWith(isLoading: false, isSuccess: false));
+      ScaffoldMessenger.of(
+        event.context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
 
-    print('Register result: $success');
+    // Call remote API register with confirmPassword included
+    final message = await _authRemoteDataSource.register(
+      event.email,
+      event.password,
+      event.confirmPassword,
+    );
 
-    if (success) {
+    print('Register result: $message');
+
+    if (message != null) {
       emit(state.copyWith(isLoading: false, isSuccess: true));
-      // Navigate to login screen on success
       Navigator.of(event.context).pushReplacementNamed('/login');
     } else {
       emit(state.copyWith(isLoading: false, isSuccess: false));
-      ScaffoldMessenger.of(event.context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwords do not match or invalid email'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        event.context,
+      ).showSnackBar(const SnackBar(content: Text('Registration failed')));
     }
   }
 }
