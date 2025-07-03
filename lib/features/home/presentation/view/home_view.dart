@@ -10,40 +10,77 @@ class HomeView extends StatelessWidget {
     return BlocBuilder<HomeViewModel, int>(
       builder: (context, selectedIndex) {
         return Scaffold(
-          appBar: AppBar(title: const Text('SkinMuse')),
-          body: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
+          appBar: AppBar(
+            backgroundColor: const Color(0xFFFAD1E3),
+            elevation: 0,
+            title: Row(
               children: [
-                const Text(
-                  'Welcome to SkinMuse!',
-                  style: TextStyle(fontSize: 22, fontFamily: 'Inter_Light'),
+                Image.asset(
+                  'assets/icon.png',
+                  height: 80, // made icon a little larger
                 ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to quiz screen here
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFA55166),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text(
-                    'Take Quiz',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'Inter_Bold',
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                // No text here
               ],
+            ),
+          ),
+          body: Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFAD1E3), Color(0xFFFF65AA)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/skinmuse_image.png',
+                    width: 180,
+                    height: 180,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Welcome to SkinMuse!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Inter_Bold',
+                      color: Color(0xFFA55166),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    '500 users satisfied, are you next?',
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Navigate to quiz screen here
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFA55166),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text(
+                      'Take Quiz',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Inter_Bold',
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           bottomNavigationBar: Padding(

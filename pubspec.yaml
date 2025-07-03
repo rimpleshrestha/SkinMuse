@@ -45,6 +45,8 @@ flutter:
 
   assets:
     - assets/skinmuselogo.png
+    - assets/skinmuse_image.png
+    - assets/icon.png
 
   fonts:
     - family: Inter_Bold
