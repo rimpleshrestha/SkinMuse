@@ -18,8 +18,6 @@ class AppTheme {
         onSecondary: Colors.white,
         error: Colors.red,
         onError: Colors.white,
-        background: const Color(0xFFFFEDF5),
-        onBackground: Colors.black,
         surface: Colors.white,
         onSurface: Colors.black,
       ),

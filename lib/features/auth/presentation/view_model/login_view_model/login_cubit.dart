@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
+import 'package:skin_muse/main.dart'; // To access the notification instance
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 enum LoginStatus { initial, loading, success, failure }
 
@@ -36,7 +38,6 @@ class LoginCubit extends Cubit<LoginState> {
     viewModel.setLoading(false);
 
     if (response != null) {
-      // Map the response data to UserHiveModel
       final user = UserHiveModel(
         firstName: response['firstName'] ?? '',
         lastName: response['lastName'] ?? '',
@@ -44,10 +45,31 @@ class LoginCubit extends Cubit<LoginState> {
         profileImage: response['profileImage'],
         email: response['email'] ?? '',
         username: response['username'] ?? '',
-        password: '', // Do not store password from response
+        password: '',
       );
 
       emit(LoginState.success(user));
+
+      // Show login notification
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
+            'login_channel',
+            'Login Notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          );
+
+      const NotificationDetails notificationDetails = NotificationDetails(
+        android: androidDetails,
+      );
+
+      await flutterLocalNotificationsPlugin.show(
+        0,
+        'Welcome to SkinMuse',
+        'You just logged into SkinMuse',
+        notificationDetails,
+      );
     } else {
       emit(LoginState.failure());
     }

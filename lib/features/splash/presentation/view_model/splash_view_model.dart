@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skin_muse/features/auth/presentation/view/login_view.dart';
-import 'package:skin_muse/views/login_screen.dart';
 
 class SplashViewModel extends Cubit<void> {
   SplashViewModel() : super(null);

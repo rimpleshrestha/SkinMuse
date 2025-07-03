@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skin_muse/core/network/api_service.dart';
-import 'package:skin_muse/features/auth/data/model/user_hive_model.dart'; // You can remove if you won't use Hive
+// You can remove if you won't use Hive
 // Import your ApiService here
 
 class RegisterViewModel extends ChangeNotifier {

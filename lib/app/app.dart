@@ -4,7 +4,6 @@ import 'package:skin_muse/app/theme/app_theme.dart';
 import 'package:skin_muse/app/service_locator/service_locator.dart';
 import 'package:skin_muse/features/splash/presentation/view/splash_view.dart';
 import 'package:skin_muse/features/splash/presentation/view_model/splash_view_model.dart';
-import 'package:skin_muse/views/splash.dart';
 
 
 class App extends StatelessWidget {

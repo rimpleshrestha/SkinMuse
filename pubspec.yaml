@@ -30,6 +30,7 @@ dependencies:
   permission_handler: ^12.0.0+1
   json_serializable: ^6.9.0
   async: ^2.13.0
+  flutter_local_notifications: ^17.0.0
 
 dev_dependencies:
   flutter_test:
@@ -54,9 +55,8 @@ flutter:
         - asset: assets/fonts/inter_light.ttf
 
 flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: "AppIcon"
+  android: true
+  ios: true
   image_path: "assets/icon.png"
   min_sdk_android: 21
   remove_alpha_ios: true
-
