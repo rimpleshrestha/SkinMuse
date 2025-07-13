@@ -7,10 +7,11 @@ import '../../view_model/register_view_model/register_view_model.dart';
 
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   final RegisterViewModel viewModel;
-  final AuthRemoteDataSource _authRemoteDataSource = AuthRemoteDataSource();
+  final AuthRemoteDataSource _authRemoteDataSource;
 
-  RegisterBloc({required this.viewModel})
-    : super(const RegisterState.initial()) {
+  RegisterBloc({required this.viewModel, AuthRemoteDataSource? remote})
+    : _authRemoteDataSource = remote ?? AuthRemoteDataSource(),
+      super(const RegisterState.initial()) {
     on<RegisterButtonPressed>(_onRegisterButtonPressed);
   }
 
@@ -33,7 +34,6 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       return;
     }
 
-    // Call remote API register with confirmPassword included
     final message = await _authRemoteDataSource.register(
       event.email,
       event.password,
