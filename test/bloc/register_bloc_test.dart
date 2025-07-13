@@ -51,4 +51,43 @@ void main() {
     expect(registerBloc.state.isLoading, false);
     expect(registerBloc.state.isSuccess, false);
   });
+
+ testWidgets('RegisterBloc sets loading to true when registration starts', (
+    tester,
+  ) async {
+    when(() => mockRemoteDataSource.register(any(), any(), any())).thenAnswer((
+      _,
+    ) async {
+      await Future.delayed(const Duration(seconds: 1)); // Simulate API delay
+      return 'User registered';
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              registerBloc.add(
+                RegisterButtonPressed(
+                  context: context,
+                  email: 'test@example.com',
+                  password: 'password123',
+                  confirmPassword: 'password123',
+                ),
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump(); // Just one tick to catch the loading state
+
+    expect(registerBloc.state.isLoading, true);
+  });
+
+
+
+
 }
