@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
 
+import 'package:skin_muse/features/quiz/presentation/view/quiz_screen.dart';
+
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
@@ -13,15 +15,7 @@ class HomeView extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: const Color(0xFFFAD1E3),
             elevation: 0,
-            title: Row(
-              children: [
-                Image.asset(
-                  'assets/icon.png',
-                  height: 80, // made icon a little larger
-                ),
-                // No text here
-              ],
-            ),
+            title: Row(children: [Image.asset('assets/icon.png', height: 80)]),
           ),
           body: Container(
             width: double.infinity,
@@ -58,7 +52,12 @@ class HomeView extends StatelessWidget {
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to quiz screen here
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const QuizScreen(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFA55166),
