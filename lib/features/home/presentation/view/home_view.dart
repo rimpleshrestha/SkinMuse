@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skin_muse/features/auth/presentation/view/profile_view.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
-
 import 'package:skin_muse/features/quiz/presentation/view/quiz_screen.dart';
+ // Ensure this path is correct
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -107,8 +108,8 @@ class HomeView extends StatelessWidget {
                     onTap: () => context.read<HomeViewModel>().setIndex(0),
                   ),
                   _NavItem(
-                    icon: Icons.sticky_note_2_outlined,
-                    label: 'Notes',
+                    icon: Icons.list,
+                    label: 'List',
                     selected: selectedIndex == 1,
                     onTap: () => context.read<HomeViewModel>().setIndex(1),
                   ),
@@ -116,7 +117,15 @@ class HomeView extends StatelessWidget {
                     icon: Icons.person,
                     label: 'Profile',
                     selected: selectedIndex == 2,
-                    onTap: () => context.read<HomeViewModel>().setIndex(2),
+                    onTap: () {
+                      context.read<HomeViewModel>().setIndex(2);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileView(email: '',),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
