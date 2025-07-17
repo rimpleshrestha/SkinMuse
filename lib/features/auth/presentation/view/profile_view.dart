@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'edit_profile_view.dart'; // Import your EditProfileView here
 
 class ProfileView extends StatefulWidget {
   final String email;
@@ -131,19 +132,31 @@ class _ProfileViewState extends State<ProfileView> {
                           ],
                         ),
                         const SizedBox(height: 30),
-                        Row(
-                          children: const [
-                            Icon(Icons.update, color: Colors.pinkAccent),
-                            SizedBox(width: 10),
-                            Text(
-                              "Update Profile",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+
+                        // Wrap this Row with GestureDetector for tapping
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const EditProfileView(),
                               ),
-                            ),
-                          ],
+                            );
+                          },
+                          child: Row(
+                            children: const [
+                              Icon(Icons.update, color: Colors.pinkAccent),
+                              SizedBox(width: 10),
+                              Text(
+                                "Update Profile",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
