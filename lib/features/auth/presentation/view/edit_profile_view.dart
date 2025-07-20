@@ -1,6 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
+import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_event.dart';
+import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_state.dart';
+
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({Key? key}) : super(key: key);
@@ -19,7 +24,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  final Color lightPink = const Color(0xFFF48FB1); // pastel pink
+  final Color lightPink = const Color(0xFFF48FB1);
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -74,76 +79,108 @@ class _EditProfileViewState extends State<EditProfileView> {
     _confirmNameController.clear();
 
     _showCenteredModal(
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "Edit Your Name",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: lightPink,
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: "Name",
-              labelStyle: const TextStyle(fontSize: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _confirmNameController,
-            decoration: InputDecoration(
-              labelText: "Confirm Name",
-              labelStyle: const TextStyle(fontSize: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: lightPink,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      BlocConsumer<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileSuccess) {
+            if (state.message.contains("name")) {
+              Navigator.of(context).pop(); // close modal
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          } else if (state is ProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+            );
+          }
+        },
+        builder: (context, state) {
+          bool isLoading = state is ProfileLoading;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Edit Your Name",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: lightPink,
                 ),
               ),
-              onPressed: () {
-                if (_nameController.text.isEmpty ||
-                    _confirmNameController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
-                  return;
-                }
-                if (_nameController.text != _confirmNameController.text) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Names do not match')),
-                  );
-                  return;
-                }
-                // Save name logic here
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                "Save",
-                style: TextStyle(fontSize: 18, color: Colors.white),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: "Name",
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 18),
               ),
-            ),
-          ),
-        ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmNameController,
+                decoration: InputDecoration(
+                  labelText: "Confirm Name",
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: lightPink,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed:
+                      isLoading
+                          ? null
+                          : () {
+                            if (_nameController.text.isEmpty ||
+                                _confirmNameController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please fill all fields'),
+                                ),
+                              );
+                              return;
+                            }
+                            if (_nameController.text !=
+                                _confirmNameController.text) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Names do not match'),
+                                ),
+                              );
+                              return;
+                            }
+                            context.read<ProfileBloc>().add(
+                              UpdateName(_nameController.text),
+                            );
+                          },
+                  child:
+                      isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            "Save",
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -154,93 +191,127 @@ class _EditProfileViewState extends State<EditProfileView> {
     _confirmPasswordController.clear();
 
     _showCenteredModal(
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "Change Password",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: lightPink,
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _currentPasswordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: "Current Password",
-              labelStyle: const TextStyle(fontSize: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _newPasswordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: "New Password",
-              labelStyle: const TextStyle(fontSize: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _confirmPasswordController,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: "Confirm Password",
-              labelStyle: const TextStyle(fontSize: 16),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            style: const TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: lightPink,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      BlocConsumer<ProfileBloc, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileSuccess) {
+            if (state.message.contains("password")) {
+              Navigator.of(context).pop(); // close modal
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          } else if (state is ProfileFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+            );
+          }
+        },
+        builder: (context, state) {
+          bool isLoading = state is ProfileLoading;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Change Password",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: lightPink,
                 ),
               ),
-              onPressed: () {
-                if (_currentPasswordController.text.isEmpty ||
-                    _newPasswordController.text.isEmpty ||
-                    _confirmPasswordController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
-                  return;
-                }
-                if (_newPasswordController.text !=
-                    _confirmPasswordController.text) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Passwords do not match')),
-                  );
-                  return;
-                }
-                // Save password logic here
-                Navigator.of(context).pop();
-              },
-              child: const Text(
-                "Save",
-                style: TextStyle(fontSize: 18, color: Colors.white),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _currentPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Current Password",
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 18),
               ),
-            ),
-          ),
-        ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _newPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "New Password",
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Confirm Password",
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: lightPink,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed:
+                      isLoading
+                          ? null
+                          : () {
+                            if (_currentPasswordController.text.isEmpty ||
+                                _newPasswordController.text.isEmpty ||
+                                _confirmPasswordController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please fill all fields'),
+                                ),
+                              );
+                              return;
+                            }
+                            if (_newPasswordController.text !=
+                                _confirmPasswordController.text) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Passwords do not match'),
+                                ),
+                              );
+                              return;
+                            }
+                            context.read<ProfileBloc>().add(
+                              ChangePassword(
+                                _currentPasswordController.text,
+                                _newPasswordController.text,
+                              ),
+                            );
+                          },
+                  child:
+                      isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            "Save",
+                            style: TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

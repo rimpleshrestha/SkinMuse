@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'edit_profile_view.dart'; // Import your EditProfileView here
+import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
+import 'edit_profile_view.dart'; 
+
 
 class ProfileView extends StatefulWidget {
   final String email;
@@ -133,13 +136,18 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         const SizedBox(height: 30),
 
-                        // Wrap this Row with GestureDetector for tapping
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const EditProfileView(),
+                                builder:
+                                    (context) => BlocProvider.value(
+                                      value: BlocProvider.of<ProfileBloc>(
+                                        context,
+                                      ),
+                                      child: const EditProfileView(),
+                                    ),
                               ),
                             );
                           },

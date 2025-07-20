@@ -34,4 +34,36 @@ class AuthRemoteDataSource {
       return null;
     }
   }
+
+  Future<String?> updateName(String name) async {
+    try {
+      final res = await ApiService.dio.put(
+        '/user/update-name',
+        data: {'name': name},
+      );
+      return res.data['message'];
+    } catch (e) {
+      print('Update name error: $e');
+      return null;
+    }
+  }
+
+  Future<String?> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    try {
+      final res = await ApiService.dio.put(
+        '/user/change-password',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        },
+      );
+      return res.data['message'];
+    } catch (e) {
+      print('Change password error: $e');
+      return null;
+    }
+  }
 }
