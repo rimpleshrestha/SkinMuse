@@ -1,93 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skin_muse/features/Products/view/product_view.dart';
 import 'package:skin_muse/features/auth/presentation/view/profile_view.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
 import 'package:skin_muse/features/quiz/presentation/view/quiz_screen.dart';
-// Ensure this path is correct
+ // <-- import your product view here
 
 class HomeView extends StatelessWidget {
-  final String email; // Add email field
+  final String email;
 
-  const HomeView({
-    super.key,
-    this.email = '',
-  }); // Accept email with default empty
+  const HomeView({super.key, this.email = ''});
+
+  // List of pages
+  List<Widget> _pages(BuildContext context, String email) => [
+    _buildWelcomeScreen(context),
+    ProductView(skinType: '',), // your product screen here
+    ProfileView(email: email),
+  ];
+
+  Widget _buildWelcomeScreen(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFFAD1E3), Color(0xFFFF65AA)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/skinmuse_image.png', width: 180, height: 180),
+            const SizedBox(height: 16),
+            const Text(
+              'Welcome to SkinMuse!',
+              style: TextStyle(
+                fontSize: 24,
+                fontFamily: 'Inter_Bold',
+                color: Color(0xFFA55166),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              '500 users satisfied, are you next?',
+              style: TextStyle(fontSize: 16, color: Colors.black87),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const QuizScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFA55166),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+              child: const Text(
+                'Take Quiz',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontFamily: 'Inter_Bold',
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeViewModel, int>(
       builder: (context, selectedIndex) {
+        final pages = _pages(context, email);
+
         return Scaffold(
           appBar: AppBar(
             backgroundColor: const Color(0xFFFAD1E3),
             elevation: 0,
             title: Row(children: [Image.asset('assets/icon.png', height: 80)]),
           ),
-          body: Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFAD1E3), Color(0xFFFF65AA)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset(
-                    'assets/skinmuse_image.png',
-                    width: 180,
-                    height: 180,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Welcome to SkinMuse!',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontFamily: 'Inter_Bold',
-                      color: Color(0xFFA55166),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    '500 users satisfied, are you next?',
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const QuizScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFA55166),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 16,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text(
-                      'Take Quiz',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'Inter_Bold',
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          body: pages[selectedIndex],
           bottomNavigationBar: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Container(
@@ -113,8 +118,8 @@ class HomeView extends StatelessWidget {
                     onTap: () => context.read<HomeViewModel>().setIndex(0),
                   ),
                   _NavItem(
-                    icon: Icons.list,
-                    label: 'List',
+                    icon: Icons.list_alt,
+                    label: 'Products', // renamed label here
                     selected: selectedIndex == 1,
                     onTap: () => context.read<HomeViewModel>().setIndex(1),
                   ),
@@ -122,15 +127,7 @@ class HomeView extends StatelessWidget {
                     icon: Icons.person,
                     label: 'Profile',
                     selected: selectedIndex == 2,
-                    onTap: () {
-                      context.read<HomeViewModel>().setIndex(2);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProfileView(email: email),
-                        ),
-                      );
-                    },
+                    onTap: () => context.read<HomeViewModel>().setIndex(2),
                   ),
                 ],
               ),
