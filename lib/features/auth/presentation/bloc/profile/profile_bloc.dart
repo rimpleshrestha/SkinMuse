@@ -3,13 +3,13 @@ import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_
 import 'profile_event.dart';
 import 'profile_state.dart';
 
-
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final AuthRemoteDataSource authRemoteDataSource;
 
   ProfileBloc({required this.authRemoteDataSource}) : super(ProfileInitial()) {
     on<UpdateName>(_onUpdateName);
     on<ChangePassword>(_onChangePassword);
+    // Removed LoadProfile since backend endpoint is missing
   }
 
   Future<void> _onUpdateName(
@@ -19,7 +19,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ProfileLoading());
     final message = await authRemoteDataSource.updateName(event.name);
     if (message != null) {
-      emit(ProfileSuccess(message));
+      emit(ProfileSuccess(message)); // just emit success message
     } else {
       emit(ProfileFailure("Failed to update name"));
     }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:skin_muse/features/Admin/view/create_post_view.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_cubit.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
 import 'package:skin_muse/features/home/presentation/view/home_view.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
+// import your CreatePostView
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -34,20 +36,28 @@ class LoginView extends StatelessWidget {
                             backgroundColor: Colors.green,
                           ),
                         );
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (_) => BlocProvider(
-                                  create: (_) => HomeViewModel(),
-                                  child: HomeView(
-                                    email:
-                                        state.user?.email ??
-                                        '', // Pass email here
+
+                        if ((state.user?.email ?? '') == 'admin@gmail.com') {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CreatePostView(),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (_) => BlocProvider(
+                                    create: (_) => HomeViewModel(),
+                                    child: HomeView(
+                                      email: state.user?.email ?? '',
+                                    ),
                                   ),
-                                ),
-                          ),
-                        );
+                            ),
+                          );
+                        }
                       } else if (state.status == LoginStatus.failure) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(

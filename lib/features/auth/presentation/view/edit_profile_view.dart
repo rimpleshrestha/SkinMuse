@@ -85,9 +85,11 @@ class _EditProfileViewState extends State<EditProfileView> {
       BlocConsumer<EditProfileBloc, EditProfileState>(
         listener: (context, state) {
           if (state is EditProfileSuccess && state.message.contains("name")) {
-            Navigator.of(
-              context,
-            ).pop(_nameController.text); // Return updated name
+            Navigator.of(context).pop(); // close modal
+            // delay to ensure modal closes first, then pop back with new name
+            Future.delayed(const Duration(milliseconds: 300), () {
+              Navigator.of(context).pop(_nameController.text);
+            });
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));

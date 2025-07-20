@@ -4,6 +4,11 @@ class ProfileInitial extends ProfileState {}
 
 class ProfileLoading extends ProfileState {}
 
+class ProfileLoaded extends ProfileState {
+  final String userName;
+  ProfileLoaded(this.userName);
+}
+
 class ProfileSuccess extends ProfileState {
   final String message;
   ProfileSuccess(this.message);
@@ -11,5 +16,5 @@ class ProfileSuccess extends ProfileState {
 
 class ProfileFailure extends ProfileState {
   final String error;
-  ProfileFailure(this.error); // <-- remove const here
+  ProfileFailure(this.error);
 }

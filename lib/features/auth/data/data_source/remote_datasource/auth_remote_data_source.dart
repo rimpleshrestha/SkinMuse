@@ -108,4 +108,19 @@ class AuthRemoteDataSource {
       return null;
     }
   }
+
+  // New method to fetch current user profile data
+  Future<Map<String, dynamic>?> getProfile() async {
+    try {
+      final token = await _getToken();
+      if (token != null) {
+        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+      final res = await ApiService.dio.get('/me'); // Adjust endpoint if needed
+      return res.data['user']; // Adjust key if needed based on API response
+    } catch (e) {
+      print('Get profile error: $e');
+      return null;
+    }
+  }
 }

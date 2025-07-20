@@ -10,3 +10,5 @@ class ChangePassword extends ProfileEvent {
   final String newPassword;
   ChangePassword(this.currentPassword, this.newPassword);
 }
+
+
