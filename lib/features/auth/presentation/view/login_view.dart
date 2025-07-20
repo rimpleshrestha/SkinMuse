@@ -40,7 +40,11 @@ class LoginView extends StatelessWidget {
                             builder:
                                 (_) => BlocProvider(
                                   create: (_) => HomeViewModel(),
-                                  child: const HomeView(),
+                                  child: HomeView(
+                                    email:
+                                        state.user?.email ??
+                                        '', // Pass email here
+                                  ),
                                 ),
                           ),
                         );

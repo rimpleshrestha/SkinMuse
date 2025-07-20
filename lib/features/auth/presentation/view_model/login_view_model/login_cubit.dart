@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
@@ -37,7 +38,11 @@ class LoginCubit extends Cubit<LoginState> {
 
     viewModel.setLoading(false);
 
-    if (response != null) {
+    if (response != null && response['accessToken'] != null) {
+      // Save token to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('accessToken', response['accessToken']);
+
       final user = UserHiveModel(
         firstName: response['firstName'] ?? '',
         lastName: response['lastName'] ?? '',

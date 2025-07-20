@@ -1,9 +1,15 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skin_muse/core/network/api_service.dart';
 
 class AuthRemoteDataSource {
+  // Helper to get saved token
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
+
   Future<String?> register(
     String email,
     String password,
@@ -40,8 +46,12 @@ class AuthRemoteDataSource {
 
   Future<String?> updateName(String name) async {
     try {
+      final token = await _getToken();
+      if (token != null) {
+        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+      }
       final res = await ApiService.dio.put(
-        '/user/update-name',
+        '/update-details', // corrected endpoint
         data: {'name': name},
       );
       return res.data['message'];
@@ -56,8 +66,12 @@ class AuthRemoteDataSource {
     String newPassword,
   ) async {
     try {
+      final token = await _getToken();
+      if (token != null) {
+        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+      }
       final res = await ApiService.dio.put(
-        '/user/change-password',
+        '/change-password', // corrected endpoint
         data: {
           'current_password': currentPassword,
           'new_password': newPassword,
@@ -72,12 +86,19 @@ class AuthRemoteDataSource {
 
   Future<String?> uploadProfilePhoto(File file) async {
     try {
+      final token = await _getToken();
+      if (token != null) {
+        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+
       FormData formData = FormData.fromMap({
-        'photo': await MultipartFile.fromFile(file.path),
+        'pfp': await MultipartFile.fromFile(
+          file.path,
+        ), // key matches backend middleware
       });
 
       final res = await ApiService.dio.put(
-        '/user/update-photo',
+        '/update-profile-image', // corrected endpoint
         data: formData,
         options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
@@ -87,5 +108,4 @@ class AuthRemoteDataSource {
       return null;
     }
   }
-
 }

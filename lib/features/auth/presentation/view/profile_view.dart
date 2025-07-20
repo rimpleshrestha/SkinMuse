@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
+// ignore: must_be_immutable
 class ProfileView extends StatefulWidget {
   final String email;
-  final String userName;
+  String userName;
 
-  const ProfileView({super.key, required this.email, this.userName = "User"});
+  ProfileView({super.key, required this.email, this.userName = "User"});
 
   @override
   State<ProfileView> createState() => _ProfileViewState();
@@ -25,8 +26,21 @@ class _ProfileViewState extends State<ProfileView> {
       isLoggingOut = false;
     });
 
-    // Replace this with your real logout logic
-    Navigator.of(context).pushReplacementNamed('/login');
+    // Navigate to login screen after logout
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
+
+  Future<void> _navigateToEditProfile() async {
+    // Await updated name returned from edit profile screen
+    final updatedName = await Navigator.of(context).pushNamed('/edit-profile');
+
+    if (updatedName != null && updatedName is String) {
+      setState(() {
+        widget.userName = updatedName;
+      });
+    }
   }
 
   @override
@@ -110,9 +124,7 @@ class _ProfileViewState extends State<ProfileView> {
                           itemBuilder:
                               (context, _) =>
                                   const Icon(Icons.star, color: Colors.yellow),
-                          onRatingUpdate: (rating) {
-                            // handle rating update
-                          },
+                          onRatingUpdate: (rating) {},
                         ),
                         const SizedBox(height: 30),
                         Row(
@@ -131,9 +143,7 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         const SizedBox(height: 30),
                         GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pushNamed('/edit-profile');
-                          },
+                          onTap: _navigateToEditProfile,
                           child: Row(
                             children: const [
                               Icon(Icons.update, color: Colors.pinkAccent),

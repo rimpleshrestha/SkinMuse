@@ -3,10 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skin_muse/features/auth/presentation/view/profile_view.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
 import 'package:skin_muse/features/quiz/presentation/view/quiz_screen.dart';
- // Ensure this path is correct
+// Ensure this path is correct
 
 class HomeView extends StatelessWidget {
-  const HomeView({super.key});
+  final String email; // Add email field
+
+  const HomeView({
+    super.key,
+    this.email = '',
+  }); // Accept email with default empty
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +127,7 @@ class HomeView extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ProfileView(email: '',),
+                          builder: (context) => ProfileView(email: email),
                         ),
                       );
                     },
