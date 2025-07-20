@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
-import 'edit_profile_view.dart'; 
-
 
 class ProfileView extends StatefulWidget {
   final String email;
@@ -36,7 +32,6 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = const Color(0xFFFFF0F5);
-    final Color primaryColor = const Color(0xFFA55166);
     final Color pinkColor = const Color(0xFFE91E63);
 
     return Scaffold(
@@ -135,21 +130,9 @@ class _ProfileViewState extends State<ProfileView> {
                           ],
                         ),
                         const SizedBox(height: 30),
-
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (context) => BlocProvider.value(
-                                      value: BlocProvider.of<ProfileBloc>(
-                                        context,
-                                      ),
-                                      child: const EditProfileView(),
-                                    ),
-                              ),
-                            );
+                            Navigator.of(context).pushNamed('/edit-profile');
                           },
                           child: Row(
                             children: const [

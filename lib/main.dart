@@ -4,11 +4,13 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
+import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_bloc.dart';
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 import 'features/home/presentation/view/home_view.dart';
 import 'features/splash/presentation/view/splash_view.dart';
 import 'features/auth/presentation/view/register_view.dart';
 import 'features/auth/presentation/view/login_view.dart';
+import 'features/auth/presentation/view/edit_profile_view.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -39,11 +41,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize AuthRemoteDataSource here
     final authRemoteDataSource = AuthRemoteDataSource();
 
-    return BlocProvider(
-      create: (_) => ProfileBloc(authRemoteDataSource: authRemoteDataSource),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ProfileBloc>(
+          create:
+              (_) => ProfileBloc(authRemoteDataSource: authRemoteDataSource),
+        ),
+        BlocProvider<EditProfileBloc>(
+          create: (_) => EditProfileBloc(authRemoteDataSource),
+        ),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: '/splash',
@@ -52,7 +61,8 @@ class MyApp extends StatelessWidget {
           '/register': (context) => const RegisterView(),
           '/login': (context) => const LoginView(),
           '/dashboard': (context) => const HomeView(),
-          // Add more routes here if needed
+          '/edit-profile': (context) => const EditProfileView(),
+          // add more routes if needed
         },
       ),
     );

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:skin_muse/core/network/api_service.dart';
 
 class AuthRemoteDataSource {
@@ -66,4 +69,23 @@ class AuthRemoteDataSource {
       return null;
     }
   }
+
+  Future<String?> uploadProfilePhoto(File file) async {
+    try {
+      FormData formData = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(file.path),
+      });
+
+      final res = await ApiService.dio.put(
+        '/user/update-photo',
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+      return res.data['message'];
+    } catch (e) {
+      print('Photo upload error: $e');
+      return null;
+    }
+  }
+
 }

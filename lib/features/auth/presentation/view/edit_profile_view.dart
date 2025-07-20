@@ -2,10 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
-import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_event.dart';
-import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_state.dart';
-
+import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_bloc.dart';
+import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_event.dart';
+import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_state.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({Key? key}) : super(key: key);
@@ -34,6 +33,10 @@ class _EditProfileViewState extends State<EditProfileView> {
       setState(() {
         _image = File(picked.path);
       });
+
+      context.read<EditProfileBloc>().add(
+        UpdateProfilePhotoPressed(picked.path),
+      );
     }
   }
 
@@ -79,23 +82,21 @@ class _EditProfileViewState extends State<EditProfileView> {
     _confirmNameController.clear();
 
     _showCenteredModal(
-      BlocConsumer<ProfileBloc, ProfileState>(
+      BlocConsumer<EditProfileBloc, EditProfileState>(
         listener: (context, state) {
-          if (state is ProfileSuccess) {
-            if (state.message.contains("name")) {
-              Navigator.of(context).pop(); // close modal
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          } else if (state is ProfileFailure) {
+          if (state is EditProfileSuccess && state.message.contains("name")) {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is EditProfileFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error), backgroundColor: Colors.red),
             );
           }
         },
         builder: (context, state) {
-          bool isLoading = state is ProfileLoading;
+          bool isLoading = state is EditProfileLoading;
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -113,24 +114,20 @@ class _EditProfileViewState extends State<EditProfileView> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: "Name",
-                  labelStyle: const TextStyle(fontSize: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _confirmNameController,
                 decoration: InputDecoration(
                   labelText: "Confirm Name",
-                  labelStyle: const TextStyle(fontSize: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -165,8 +162,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                               );
                               return;
                             }
-                            context.read<ProfileBloc>().add(
-                              UpdateName(_nameController.text),
+                            context.read<EditProfileBloc>().add(
+                              UpdateNamePressed(_nameController.text),
                             );
                           },
                   child:
@@ -191,23 +188,22 @@ class _EditProfileViewState extends State<EditProfileView> {
     _confirmPasswordController.clear();
 
     _showCenteredModal(
-      BlocConsumer<ProfileBloc, ProfileState>(
+      BlocConsumer<EditProfileBloc, EditProfileState>(
         listener: (context, state) {
-          if (state is ProfileSuccess) {
-            if (state.message.contains("password")) {
-              Navigator.of(context).pop(); // close modal
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.message)));
-            }
-          } else if (state is ProfileFailure) {
+          if (state is EditProfileSuccess &&
+              state.message.contains("password")) {
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is EditProfileFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error), backgroundColor: Colors.red),
             );
           }
         },
         builder: (context, state) {
-          bool isLoading = state is ProfileLoading;
+          bool isLoading = state is EditProfileLoading;
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -226,12 +222,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Current Password",
-                  labelStyle: const TextStyle(fontSize: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -239,12 +233,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "New Password",
-                  labelStyle: const TextStyle(fontSize: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -252,12 +244,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
-                  labelStyle: const TextStyle(fontSize: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                style: const TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -293,8 +283,8 @@ class _EditProfileViewState extends State<EditProfileView> {
                               );
                               return;
                             }
-                            context.read<ProfileBloc>().add(
-                              ChangePassword(
+                            context.read<EditProfileBloc>().add(
+                              ChangePasswordPressed(
                                 _currentPasswordController.text,
                                 _newPasswordController.text,
                               ),
@@ -318,9 +308,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = const Color(
-      0xFFFFF0F5,
-    ); // very light pink background
+    final Color backgroundColor = const Color(0xFFFFF0F5);
 
     return Scaffold(
       appBar: AppBar(
