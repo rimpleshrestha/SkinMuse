@@ -2,18 +2,17 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 class ProductDetailModal extends StatefulWidget {
   final Map<String, dynamic> product;
   final ScrollController scrollController;
-  final String currentUserId;
 
   const ProductDetailModal({
-    Key? key,
+    super.key,
     required this.product,
     required this.scrollController,
-    required this.currentUserId,
-  }) : super(key: key);
+  });
 
   @override
   State<ProductDetailModal> createState() => _ProductDetailModalState();
@@ -24,11 +23,27 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
   final TextEditingController _commentController = TextEditingController();
   String editingCommentId = '';
   String editingText = '';
+  String? currentUserId;
 
   @override
   void initState() {
     super.initState();
-    fetchComments();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _loadCurrentUserId();
+    await fetchComments();
+  }
+
+  Future<void> _loadCurrentUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    if (token != null) {
+      final decoded = Jwt.parseJwt(token);
+      currentUserId = decoded['id'];
+      print('🔓 Decoded userId from token: $currentUserId');
+    }
   }
 
   Future<Map<String, String>> _getAuthHeaders() async {
@@ -141,20 +156,19 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                       itemCount: comments.length,
                       itemBuilder: (context, index) {
                         final comment = comments[index];
-
-                        // Extract and compare user ID
                         final commentUser = comment['user'];
                         final commentUserId =
                             commentUser is Map
                                 ? commentUser['_id']
-                                : commentUser;
-                        final isOwner = commentUserId == widget.currentUserId;
-                        final authorName =
-                            isOwner
-                                ? 'You'
-                                : (commentUser is Map
-                                    ? commentUser['name'] ?? 'Unknown'
-                                    : 'Unknown');
+                                : commentUser.toString();
+
+                        final isOwner =
+                            currentUserId != null &&
+                            commentUserId.trim() == currentUserId!.trim();
+
+                        print('➡️ currentUserId: $currentUserId');
+                        print('➡️ commentUserId: $commentUserId');
+                        print('➡️ Match: $isOwner');
 
                         return IntrinsicHeight(
                           child: Container(
@@ -166,7 +180,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                                 BoxShadow(
                                   color: Colors.black12,
                                   blurRadius: 6,
-                                  offset: Offset(0, 2),
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                               borderRadius: BorderRadius.circular(12),
@@ -175,11 +189,13 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  authorName,
+                                  commentUser is Map &&
+                                          commentUser['name'] != null
+                                      ? commentUser['name']
+                                      : 'User',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
-                                    color: Colors.black87,
                                   ),
                                 ),
                                 const SizedBox(height: 4),

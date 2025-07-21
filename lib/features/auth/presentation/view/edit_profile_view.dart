@@ -7,7 +7,7 @@ import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profi
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_state.dart';
 
 class EditProfileView extends StatefulWidget {
-  const EditProfileView({Key? key}) : super(key: key);
+  const EditProfileView({super.key});
 
   @override
   State<EditProfileView> createState() => _EditProfileViewState();

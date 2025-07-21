@@ -4,7 +4,7 @@ import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:skin_muse/main.dart'; // for notification plugin
+import 'package:skin_muse/main.dart'; // for flutterLocalNotificationsPlugin
 import 'package:hive/hive.dart';
 
 enum LoginStatus { initial, loading, success, failure }
@@ -40,30 +40,31 @@ class LoginCubit extends Cubit<LoginState> {
     viewModel.setLoading(false);
 
     if (response != null && response['accessToken'] != null) {
-      // Save token
+      // Save token and user ID to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('accessToken', response['accessToken']);
+      await prefs.setString('userId', response['_id'] ?? '');
 
       // Create Hive model
       final user = UserHiveModel(
-        userId: response['_id'] ?? '', // ← IMPORTANT for currentUserId
+        userId: response['_id'] ?? '',
         firstName: response['firstName'] ?? '',
         lastName: response['lastName'] ?? '',
         phone: response['phone'] ?? '',
         profileImage: response['profileImage'],
         email: response['email'] ?? '',
         username: response['username'] ?? '',
-        password: '', // Do not store plain password
+        password: '', // We don't store password
       );
 
       // Save user to Hive
       final box = Hive.box<UserHiveModel>('users');
-      await box.clear(); // remove previous user (if any)
+      await box.clear(); // optional: clear previous user
       await box.add(user);
 
       emit(LoginState.success(user));
 
-      // Show local notification
+      // Trigger a login success notification
       const androidDetails = AndroidNotificationDetails(
         'login_channel',
         'Login Notifications',
@@ -82,6 +83,17 @@ class LoginCubit extends Cubit<LoginState> {
       );
     } else {
       emit(LoginState.failure());
+    }
+  }
+
+  // ✅ Load user from Hive box at app start
+  Future<void> loadUserFromStorage() async {
+    final box = Hive.box<UserHiveModel>('users');
+    if (box.isNotEmpty) {
+      final user = box.getAt(0);
+      if (user != null) {
+        emit(LoginState.success(user));
+      }
     }
   }
 }

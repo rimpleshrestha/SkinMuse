@@ -36,11 +36,16 @@ void main() async {
   Hive.registerAdapter(UserHiveModelAdapter());
   await Hive.openBox<UserHiveModel>('users');
 
-  runApp(const MyApp());
+  // ✅ Create and load LoginCubit before runApp
+  final loginCubit = LoginCubit(viewModel: LoginViewModel());
+  await loginCubit.loadUserFromStorage();
+
+  runApp(MyApp(loginCubit: loginCubit));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final LoginCubit loginCubit;
+  const MyApp({super.key, required this.loginCubit});
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +53,7 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LoginCubit>(
-          create: (_) => LoginCubit(viewModel: LoginViewModel()),
-        ),
+        BlocProvider<LoginCubit>.value(value: loginCubit),
         BlocProvider<ProfileBloc>(
           create:
               (_) => ProfileBloc(authRemoteDataSource: authRemoteDataSource),
