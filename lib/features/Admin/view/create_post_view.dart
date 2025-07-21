@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skin_muse/features/Products/view/product_view.dart';
 
 class CreatePostView extends StatefulWidget {
-  final String? postId;
-
-  const CreatePostView({super.key, this.postId});
+  const CreatePostView({super.key});
 
   @override
   State<CreatePostView> createState() => _CreatePostViewState();
@@ -20,36 +20,31 @@ class _CreatePostViewState extends State<CreatePostView> {
 
   final Color primaryColor = const Color(0xFFA55166);
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.postId != null) {
-      _fetchPost();
-    }
-  }
-
-  Future<void> _fetchPost() async {
-    try {
-      final response = await http.get(
-        Uri.parse('https://your-api-url.com/post/${widget.postId}'),
-      );
-      if (response.statusCode == 200) {
-        final post = jsonDecode(response.body)['post'];
-        setState(() {
-          _titleController.text = post['title'];
-          _descriptionController.text = post['description'];
-          _imageUrlController.text = post['image'];
-          _skinType = post['skin_type'];
-        });
-      } else {
-        Fluttertoast.showToast(msg: "Error loading post");
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Failed to fetch post");
-    }
-  }
-
   Future<void> _handleSubmit() async {
+    print("\n=== DEBUGGING POST CREATION ===");
+
+    if (_titleController.text.isEmpty ||
+        _descriptionController.text.isEmpty ||
+        _skinType == null ||
+        _imageUrlController.text.isEmpty) {
+      print("❌ Form validation failed");
+      Fluttertoast.showToast(msg: "Please fill all fields");
+      return;
+    }
+    print("✅ Form validation passed");
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+
+    print("\n🔑 Token Debug:");
+    print("Token: '$token'");
+    if (token == null || token.isEmpty) {
+      Fluttertoast.showToast(msg: "User not authenticated - no token found");
+      return;
+    }
+    print("✅ Token found and valid");
+
+    final uri = Uri.parse("http://10.0.2.2:3000/api/post"); // ✅ updated port
     final data = jsonEncode({
       'title': _titleController.text,
       'description': _descriptionController.text,
@@ -57,28 +52,21 @@ class _CreatePostViewState extends State<CreatePostView> {
       'image': _imageUrlController.text,
     });
 
-    try {
-      final url =
-          widget.postId != null
-              ? 'https://your-api-url.com/post/${widget.postId}'
-              : 'https://your-api-url.com/post';
-      final response =
-          await (widget.postId != null
-              ? http.put(
-                Uri.parse(url),
-                body: data,
-                headers: {'Content-Type': 'application/json'},
-              )
-              : http.post(
-                Uri.parse(url),
-                body: data,
-                headers: {'Content-Type': 'application/json'},
-              ));
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Fluttertoast.showToast(
-          msg: widget.postId != null ? "Post updated" : "Post created",
-        );
+    try {
+      print("\n📡 Sending request...");
+      final response = await http.post(uri, body: data, headers: headers);
+
+      print("\n📥 Response Debug:");
+      print("Status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        Fluttertoast.showToast(msg: "Post created successfully!");
         _titleController.clear();
         _descriptionController.clear();
         _imageUrlController.clear();
@@ -86,84 +74,32 @@ class _CreatePostViewState extends State<CreatePostView> {
           _skinType = null;
         });
       } else {
-        Fluttertoast.showToast(msg: "Failed to submit post");
+        final errorData = jsonDecode(response.body);
+        Fluttertoast.showToast(
+          msg: "Failed: ${errorData['message'] ?? response.statusCode}",
+        );
       }
     } catch (e) {
-      Fluttertoast.showToast(msg: "An error occurred");
+      print("❌ Request exception: $e");
+      Fluttertoast.showToast(msg: "Network error: $e");
     }
+
+    print("=== END DEBUGGING ===\n");
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFfad1e3), Color(0x1Aff65aa)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Container(
-              width: 600,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFFA55166).withOpacity(0.25),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    "Create Post for SkinMusers",
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: "Julius Sans One",
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  _buildInput("Post Title", _titleController),
-                  const SizedBox(height: 16),
-                  _buildTextArea("Description", _descriptionController),
-                  const SizedBox(height: 16),
-                  _buildDropdown(),
-                  const SizedBox(height: 16),
-                  _buildInput("Image URL", _imageUrlController),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _handleSubmit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      "Create Post",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  Future<void> _testConnection() async {
+    print("\n=== TESTING BACKEND CONNECTION ===");
+    try {
+      final response = await http.get(
+        Uri.parse("http://10.0.2.2:3000"),
+      ); // ✅ updated port
+      print("✅ Connection test successful");
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.body}");
+    } catch (e) {
+      print("❌ Connection test failed: $e");
+    }
+    print("=== END CONNECTION TEST ===\n");
   }
 
   Widget _buildInput(String label, TextEditingController controller) {
@@ -173,46 +109,17 @@ class _CreatePostViewState extends State<CreatePostView> {
         Text(
           label,
           style: const TextStyle(
-            color: Colors.white,
+            color: Color(0xFFA55166),
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: controller,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextArea(String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          maxLines: 4,
-          decoration: const InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ],
@@ -223,10 +130,10 @@ class _CreatePostViewState extends State<CreatePostView> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           "Skin Type",
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Color(0xFFA55166),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -240,19 +147,106 @@ class _CreatePostViewState extends State<CreatePostView> {
             DropdownMenuItem(value: "Normal", child: Text("Normal")),
           ],
           onChanged: (value) => setState(() => _skinType = value),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           style: const TextStyle(
-            color: Colors.black, // keep dropdown text black for readability
+            color: Colors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFfad1e3),
+      appBar: AppBar(
+        backgroundColor: primaryColor,
+        title: const Text("Create Post for SkinMusers"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.network_check),
+            onPressed: _testConnection,
+            tooltip: "Test Backend Connection",
+          ),
+        ],
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Container(
+            width: 600,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(color: Colors.black26, blurRadius: 10),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildInput("Post Title", _titleController),
+                const SizedBox(height: 16),
+                _buildInput("Description", _descriptionController),
+                const SizedBox(height: 16),
+                _buildDropdown(),
+                const SizedBox(height: 16),
+                _buildInput("Image URL", _imageUrlController),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _handleSubmit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Create Post",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProductView(skinType: ''),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[700],
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    "Go to Product View",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
