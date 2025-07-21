@@ -68,9 +68,6 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
       body: jsonEncode({'comment': text}),
     );
 
-    print("Submit status: ${res.statusCode}");
-    print("Response: ${res.body}");
-
     if (res.statusCode == 200 || res.statusCode == 201) {
       _commentController.clear();
       fetchComments();
@@ -144,7 +141,20 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                       itemCount: comments.length,
                       itemBuilder: (context, index) {
                         final comment = comments[index];
-                        final isOwner = comment['user'] == widget.currentUserId;
+
+                        // Extract and compare user ID
+                        final commentUser = comment['user'];
+                        final commentUserId =
+                            commentUser is Map
+                                ? commentUser['_id']
+                                : commentUser;
+                        final isOwner = commentUserId == widget.currentUserId;
+                        final authorName =
+                            isOwner
+                                ? 'You'
+                                : (commentUser is Map
+                                    ? commentUser['name'] ?? 'Unknown'
+                                    : 'Unknown');
 
                         return IntrinsicHeight(
                           child: Container(
@@ -156,7 +166,7 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                                 BoxShadow(
                                   color: Colors.black12,
                                   blurRadius: 6,
-                                  offset: const Offset(0, 2),
+                                  offset: Offset(0, 2),
                                 ),
                               ],
                               borderRadius: BorderRadius.circular(12),
@@ -164,6 +174,15 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text(
+                                  authorName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
                                 editingCommentId == comment['_id']
                                     ? Column(
                                       children: [
