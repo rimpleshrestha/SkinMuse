@@ -166,16 +166,21 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                             currentUserId != null &&
                             commentUserId.trim() == currentUserId!.trim();
 
-                        print('➡️ currentUserId: $currentUserId');
-                        print('➡️ commentUserId: $commentUserId');
-                        print('➡️ Match: $isOwner');
+                        final timestamp = comment['createdAt'];
+                        final createdAt =
+                            timestamp != null
+                                ? DateTime.tryParse(timestamp)
+                                : null;
 
                         return IntrinsicHeight(
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color:
+                                  isOwner
+                                      ? const Color(0xFFFFE3EC)
+                                      : Colors.white,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black12,
@@ -199,6 +204,15 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
+                                if (createdAt != null)
+                                  Text(
+                                    '${createdAt.toLocal()}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                const SizedBox(height: 4),
                                 editingCommentId == comment['_id']
                                     ? Column(
                                       children: [
@@ -216,14 +230,33 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.end,
                                           children: [
-                                            TextButton(
+                                            ElevatedButton(
                                               onPressed:
                                                   () => updateComment(
                                                     comment['_id'],
                                                     editingText,
                                                   ),
-                                              child: const Text("Save"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.pinkAccent,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 8,
+                                                    ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                "Save",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
+                                            const SizedBox(width: 8),
                                             TextButton(
                                               onPressed:
                                                   () => setState(() {
@@ -245,15 +278,31 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
-                                      TextButton(
+                                      ElevatedButton(
                                         onPressed: () {
                                           setState(() {
                                             editingCommentId = comment['_id'];
                                             editingText = comment['comment'];
                                           });
                                         },
-                                        child: const Text("Edit"),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.pinkAccent,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 8,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Edit",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
                                       ),
+                                      const SizedBox(width: 8),
                                       TextButton(
                                         onPressed:
                                             () => deleteComment(comment['_id']),
