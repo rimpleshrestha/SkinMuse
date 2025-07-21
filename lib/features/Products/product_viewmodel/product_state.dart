@@ -1,3 +1,5 @@
+import 'package:skin_muse/features/Products/product_viewmodel/product_model.dart';
+
 abstract class ProductState {}
 
 class ProductInitial extends ProductState {}
@@ -5,7 +7,7 @@ class ProductInitial extends ProductState {}
 class ProductLoading extends ProductState {}
 
 class ProductLoaded extends ProductState {
-  final List<dynamic> products;
+  final List<Product> products;
 
   ProductLoaded(this.products);
 }

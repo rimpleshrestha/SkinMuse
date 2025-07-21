@@ -34,6 +34,7 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   fluttertoast: ^8.2.12
   http: ^1.1.0  # upgraded to resolve conflict with lottie
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:

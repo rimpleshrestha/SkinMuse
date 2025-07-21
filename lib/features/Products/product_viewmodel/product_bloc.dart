@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skin_muse/features/Products/product_viewmodel/product_model.dart';
 import 'package:skin_muse/features/Products/product_viewmodel/product_view_model.dart';
 import 'package:skin_muse/features/Products/remote_datasource/product_remote_data_source.dart';
 import 'product_event.dart';
@@ -15,7 +16,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         final products = await _viewModel.fetchProductsBySkinType(
           event.skinType,
         );
-        emit(ProductLoaded(products));
+        emit(ProductLoaded(products.cast<Product>()));
       } catch (e) {
         emit(ProductError('Failed to load products'));
       }
