@@ -3,8 +3,13 @@ import 'package:skin_muse/features/Products/view/product_detail_modal.dart';
 
 class ProductCard extends StatefulWidget {
   final Map<String, dynamic> product;
+  final String currentUserId;
 
-  const ProductCard({Key? key, required this.product}) : super(key: key);
+  const ProductCard({
+    Key? key,
+    required this.product,
+    required this.currentUserId,
+  }) : super(key: key);
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -37,6 +42,7 @@ class _ProductCardState extends State<ProductCard> {
                 (context, scrollController) => ProductDetailModal(
                   product: widget.product,
                   scrollController: scrollController,
+                  currentUserId: widget.currentUserId,
                 ),
           ),
     );

@@ -3,8 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
-import 'package:skin_muse/main.dart'; // To access the notification instance
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:skin_muse/main.dart'; // for notification plugin
+import 'package:hive/hive.dart';
 
 enum LoginStatus { initial, loading, success, failure }
 
@@ -39,35 +40,39 @@ class LoginCubit extends Cubit<LoginState> {
     viewModel.setLoading(false);
 
     if (response != null && response['accessToken'] != null) {
-      // Save token to SharedPreferences
+      // Save token
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('accessToken', response['accessToken']);
 
+      // Create Hive model
       final user = UserHiveModel(
+        userId: response['_id'] ?? '', // ← IMPORTANT for currentUserId
         firstName: response['firstName'] ?? '',
         lastName: response['lastName'] ?? '',
         phone: response['phone'] ?? '',
         profileImage: response['profileImage'],
         email: response['email'] ?? '',
         username: response['username'] ?? '',
-        password: '',
+        password: '', // Do not store plain password
       );
+
+      // Save user to Hive
+      final box = Hive.box<UserHiveModel>('users');
+      await box.clear(); // remove previous user (if any)
+      await box.add(user);
 
       emit(LoginState.success(user));
 
-      // Show login notification
-      const AndroidNotificationDetails androidDetails =
-          AndroidNotificationDetails(
-            'login_channel',
-            'Login Notifications',
-            importance: Importance.max,
-            priority: Priority.high,
-            icon: '@mipmap/ic_launcher',
-          );
-
-      const NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails,
+      // Show local notification
+      const androidDetails = AndroidNotificationDetails(
+        'login_channel',
+        'Login Notifications',
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
       );
+
+      const notificationDetails = NotificationDetails(android: androidDetails);
 
       await flutterLocalNotificationsPlugin.show(
         0,

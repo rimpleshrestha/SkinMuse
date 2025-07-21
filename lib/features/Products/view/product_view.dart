@@ -6,6 +6,7 @@ import 'package:skin_muse/features/Products/product_viewmodel/product_event.dart
 import 'package:skin_muse/features/Products/product_viewmodel/product_model.dart';
 import 'package:skin_muse/features/Products/product_viewmodel/product_state.dart';
 import 'package:skin_muse/features/Products/view/product_card.dart';
+import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_cubit.dart';
 
 class ProductView extends StatefulWidget {
   final String skinType;
@@ -33,6 +34,8 @@ class _ProductViewState extends State<ProductView> {
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = context.read<LoginCubit>().state.user?.userId ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFFfad1e3),
       appBar: AppBar(
@@ -76,10 +79,7 @@ class _ProductViewState extends State<ProductView> {
                   return const SizedBox();
                 }
 
-                return ProductCard(
-                  product: map,
-                  // onTap: () {}, // Removed or replace with the correct parameter if needed
-                );
+                return ProductCard(product: map, currentUserId: currentUserId);
               },
             );
           } else if (state is ProductError) {

@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_bloc.dart';
+
 import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
+import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_cubit.dart';
+import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
+
 import 'features/home/presentation/view/home_view.dart';
 import 'features/splash/presentation/view/splash_view.dart';
 import 'features/auth/presentation/view/register_view.dart';
@@ -21,11 +26,9 @@ void main() async {
   // Initialize Notifications
   const AndroidInitializationSettings androidSettings =
       AndroidInitializationSettings('@mipmap/ic_launcher');
-
   const InitializationSettings initSettings = InitializationSettings(
     android: androidSettings,
   );
-
   await flutterLocalNotificationsPlugin.initialize(initSettings);
 
   // Initialize Hive
@@ -45,6 +48,9 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
+        BlocProvider<LoginCubit>(
+          create: (_) => LoginCubit(viewModel: LoginViewModel()),
+        ),
         BlocProvider<ProfileBloc>(
           create:
               (_) => ProfileBloc(authRemoteDataSource: authRemoteDataSource),
@@ -62,7 +68,6 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginView(),
           '/dashboard': (context) => const HomeView(),
           '/edit-profile': (context) => const EditProfileView(),
-          // add more routes if needed
         },
       ),
     );
