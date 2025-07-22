@@ -6,10 +6,13 @@ class UpdateNamePressed extends EditProfileEvent {
 }
 
 class ChangePasswordPressed extends EditProfileEvent {
-  final String currentPassword;
+  final String email;
   final String newPassword;
-  ChangePasswordPressed(this.currentPassword, this.newPassword);
+  final String confirmPassword;
+
+  ChangePasswordPressed(this.email, this.newPassword, this.confirmPassword);
 }
+
 
 class UpdateProfilePhotoPressed extends EditProfileEvent {
   final String imagePath;

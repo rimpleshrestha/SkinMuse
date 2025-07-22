@@ -4,7 +4,6 @@ import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_
 import 'edit_profile_event.dart';
 import 'edit_profile_state.dart';
 
-
 class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
   final AuthRemoteDataSource dataSource;
 
@@ -33,8 +32,9 @@ class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
   ) async {
     emit(EditProfileLoading());
     final result = await dataSource.changePassword(
-      event.currentPassword,
+      event.email,
       event.newPassword,
+      event.confirmPassword,
     );
     if (result != null) {
       emit(EditProfileSuccess(result));

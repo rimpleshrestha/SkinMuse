@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_bloc.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_event.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_state.dart';
+import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_cubit.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});
@@ -28,12 +29,10 @@ class _EditProfileViewState extends State<EditProfileView> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
-
     if (picked != null) {
       setState(() {
         _image = File(picked.path);
       });
-
       context.read<EditProfileBloc>().add(
         UpdateProfilePhotoPressed(picked.path),
       );
@@ -49,10 +48,7 @@ class _EditProfileViewState extends State<EditProfileView> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 24,
-          ),
+          insetPadding: const EdgeInsets.all(24),
           child: Stack(
             children: [
               Padding(
@@ -85,23 +81,40 @@ class _EditProfileViewState extends State<EditProfileView> {
       BlocConsumer<EditProfileBloc, EditProfileState>(
         listener: (context, state) {
           if (state is EditProfileSuccess && state.message.contains("name")) {
-            Navigator.of(context).pop(); // close modal
-            // delay to ensure modal closes first, then pop back with new name
+            Navigator.of(context).pop();
             Future.delayed(const Duration(milliseconds: 300), () {
               Navigator.of(context).pop(_nameController.text);
             });
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Name updated successfully'),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.all(16),
+                duration: const Duration(seconds: 3),
+              ),
+            );
           } else if (state is EditProfileFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
+              SnackBar(
+                content: Text(state.error),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.all(16),
+                duration: const Duration(seconds: 3),
+              ),
             );
           }
         },
-        builder: (context, state) {
-          bool isLoading = state is EditProfileLoading;
 
+        builder: (context, state) {
+          final isLoading = state is EditProfileLoading;
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -191,119 +204,174 @@ class _EditProfileViewState extends State<EditProfileView> {
     _newPasswordController.clear();
     _confirmPasswordController.clear();
 
-    _showCenteredModal(
-      BlocConsumer<EditProfileBloc, EditProfileState>(
-        listener: (context, state) {
-          if (state is EditProfileSuccess &&
-              state.message.contains("password")) {
-            Navigator.of(context).pop();
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          } else if (state is EditProfileFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
-            );
-          }
-        },
-        builder: (context, state) {
-          bool isLoading = state is EditProfileLoading;
+    bool currentVisible = false;
+    bool newVisible = false;
+    bool confirmVisible = false;
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Change Password",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: lightPink,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _currentPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Current Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+    _showCenteredModal(
+      StatefulBuilder(
+        builder: (context, setModalState) {
+          return BlocConsumer<EditProfileBloc, EditProfileState>(
+            listener: (context, state) {
+              if (state is EditProfileSuccess &&
+                  state.message.contains("password")) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
+              } else if (state is EditProfileFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.error),
+                    backgroundColor: Colors.red,
                   ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "New Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Confirm Password",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: lightPink,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                );
+              }
+            },
+            builder: (context, state) {
+              final isLoading = state is EditProfileLoading;
+              final email = context.read<LoginCubit>().state.user?.email ?? '';
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Change Password",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: lightPink,
                     ),
                   ),
-                  onPressed:
-                      isLoading
-                          ? null
-                          : () {
-                            if (_currentPasswordController.text.isEmpty ||
-                                _newPasswordController.text.isEmpty ||
-                                _confirmPasswordController.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Please fill all fields'),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _currentPasswordController,
+                    obscureText: !currentVisible,
+                    decoration: InputDecoration(
+                      labelText: "Current Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          currentVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed:
+                            () => setModalState(
+                              () => currentVisible = !currentVisible,
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _newPasswordController,
+                    obscureText: !newVisible,
+                    decoration: InputDecoration(
+                      labelText: "New Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          newVisible ? Icons.visibility : Icons.visibility_off,
+                        ),
+                        onPressed:
+                            () => setModalState(() => newVisible = !newVisible),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _confirmPasswordController,
+                    obscureText: !confirmVisible,
+                    decoration: InputDecoration(
+                      labelText: "Confirm Password",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          confirmVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed:
+                            () => setModalState(
+                              () => confirmVisible = !confirmVisible,
+                            ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: lightPink,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () {
+                                final current =
+                                    _currentPasswordController.text.trim();
+                                final newPass =
+                                    _newPasswordController.text.trim();
+                                final confirm =
+                                    _confirmPasswordController.text.trim();
+
+                                if (current.isEmpty ||
+                                    newPass.isEmpty ||
+                                    confirm.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Please fill all fields'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (newPass != confirm) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Passwords do not match'),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                context.read<EditProfileBloc>().add(
+                                  ChangePasswordPressed(
+                                    email,
+                                    newPass,
+                                    confirm,
+                                  ),
+                                );
+                              },
+                      child:
+                          isLoading
+                              ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                              : const Text(
+                                "Save",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
                                 ),
-                              );
-                              return;
-                            }
-                            if (_newPasswordController.text !=
-                                _confirmPasswordController.text) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Passwords do not match'),
-                                ),
-                              );
-                              return;
-                            }
-                            context.read<EditProfileBloc>().add(
-                              ChangePasswordPressed(
-                                _currentPasswordController.text,
-                                _newPasswordController.text,
                               ),
-                            );
-                          },
-                  child:
-                      isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                            "Save",
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                ),
-              ),
-            ],
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
@@ -312,7 +380,7 @@ class _EditProfileViewState extends State<EditProfileView> {
 
   @override
   Widget build(BuildContext context) {
-    final Color backgroundColor = const Color(0xFFFFF0F5);
+    final backgroundColor = const Color(0xFFFFF0F5);
 
     return Scaffold(
       appBar: AppBar(

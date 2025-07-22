@@ -51,7 +51,7 @@ class AuthRemoteDataSource {
         ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
       }
       final res = await ApiService.dio.put(
-        '/update-details', // corrected endpoint
+        '/update-details',
         data: {'name': name},
       );
       return res.data['message'];
@@ -61,20 +61,24 @@ class AuthRemoteDataSource {
     }
   }
 
-  Future<String?> changePassword(
-    String currentPassword,
+  // ✅ FIXED: Use new + confirm password as required by backend
+Future<String?> changePassword(
+    String email,
     String newPassword,
+    String confirmPassword,
   ) async {
     try {
       final token = await _getToken();
       if (token != null) {
         ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
       }
+
       final res = await ApiService.dio.put(
-        '/change-password', // corrected endpoint
+        '/change-password',
         data: {
-          'current_password': currentPassword,
+          'email': email,
           'new_password': newPassword,
+          'confirm_password': confirmPassword,
         },
       );
       return res.data['message'];
@@ -84,6 +88,9 @@ class AuthRemoteDataSource {
     }
   }
 
+
+
+
   Future<String?> uploadProfilePhoto(File file) async {
     try {
       final token = await _getToken();
@@ -92,13 +99,11 @@ class AuthRemoteDataSource {
       }
 
       FormData formData = FormData.fromMap({
-        'pfp': await MultipartFile.fromFile(
-          file.path,
-        ), // key matches backend middleware
+        'pfp': await MultipartFile.fromFile(file.path),
       });
 
       final res = await ApiService.dio.put(
-        '/update-profile-image', // corrected endpoint
+        '/update-profile-image',
         data: formData,
         options: Options(headers: {'Content-Type': 'multipart/form-data'}),
       );
@@ -109,15 +114,14 @@ class AuthRemoteDataSource {
     }
   }
 
-  // New method to fetch current user profile data
   Future<Map<String, dynamic>?> getProfile() async {
     try {
       final token = await _getToken();
       if (token != null) {
         ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
       }
-      final res = await ApiService.dio.get('/me'); // Adjust endpoint if needed
-      return res.data['user']; // Adjust key if needed based on API response
+      final res = await ApiService.dio.get('/me');
+      return res.data['user'];
     } catch (e) {
       print('Get profile error: $e');
       return null;

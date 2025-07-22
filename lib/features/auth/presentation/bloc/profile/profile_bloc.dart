@@ -19,7 +19,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ProfileLoading());
     final message = await authRemoteDataSource.updateName(event.name);
     if (message != null) {
-      emit(ProfileSuccess(message)); // just emit success message
+      emit(ProfileSuccess(message));
     } else {
       emit(ProfileFailure("Failed to update name"));
     }
@@ -31,8 +31,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     emit(ProfileLoading());
     final message = await authRemoteDataSource.changePassword(
-      event.currentPassword,
+      event.email,
       event.newPassword,
+      event.confirmPassword,
     );
     if (message != null) {
       emit(ProfileSuccess(message));

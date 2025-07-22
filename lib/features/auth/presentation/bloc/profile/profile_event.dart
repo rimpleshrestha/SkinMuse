@@ -6,9 +6,14 @@ class UpdateName extends ProfileEvent {
 }
 
 class ChangePassword extends ProfileEvent {
-  final String currentPassword;
+  final String email;
   final String newPassword;
-  ChangePassword(this.currentPassword, this.newPassword);
-}
+  final String confirmPassword;
 
+  ChangePassword({
+    required this.email,
+    required this.newPassword,
+    required this.confirmPassword,
+  });
+}
 
