@@ -4,17 +4,22 @@ import 'package:skin_muse/features/Products/view/product_view.dart';
 import 'package:skin_muse/features/auth/presentation/view/profile_view.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
 import 'package:skin_muse/features/quiz/presentation/view/quiz_screen.dart';
- // <-- import your product view here
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   final String email;
 
   const HomeView({super.key, this.email = ''});
 
-  // List of pages
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  bool showQuiz = false;
+
   List<Widget> _pages(BuildContext context, String email) => [
     _buildWelcomeScreen(context),
-    ProductView(skinType: '',), // your product screen here
+    ProductView(skinType: ''),
     ProfileView(email: email),
   ];
 
@@ -50,10 +55,9 @@ class HomeView extends StatelessWidget {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const QuizScreen()),
-                );
+                setState(() {
+                  showQuiz = true;
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFA55166),
@@ -84,7 +88,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeViewModel, int>(
       builder: (context, selectedIndex) {
-        final pages = _pages(context, email);
+        final pages = _pages(context, widget.email);
 
         return Scaffold(
           appBar: AppBar(
@@ -92,7 +96,7 @@ class HomeView extends StatelessWidget {
             elevation: 0,
             title: Row(children: [Image.asset('assets/icon.png', height: 80)]),
           ),
-          body: pages[selectedIndex],
+          body: showQuiz ? QuizScreen(onFinished: (String result) {  },) : pages[selectedIndex],
           bottomNavigationBar: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Container(
@@ -115,19 +119,34 @@ class HomeView extends StatelessWidget {
                     icon: Icons.home,
                     label: 'Home',
                     selected: selectedIndex == 0,
-                    onTap: () => context.read<HomeViewModel>().setIndex(0),
+                    onTap: () {
+                      setState(() {
+                        showQuiz = false;
+                      });
+                      context.read<HomeViewModel>().setIndex(0);
+                    },
                   ),
                   _NavItem(
                     icon: Icons.list_alt,
-                    label: 'Products', // renamed label here
+                    label: 'Products',
                     selected: selectedIndex == 1,
-                    onTap: () => context.read<HomeViewModel>().setIndex(1),
+                    onTap: () {
+                      setState(() {
+                        showQuiz = false;
+                      });
+                      context.read<HomeViewModel>().setIndex(1);
+                    },
                   ),
                   _NavItem(
                     icon: Icons.person,
                     label: 'Profile',
                     selected: selectedIndex == 2,
-                    onTap: () => context.read<HomeViewModel>().setIndex(2),
+                    onTap: () {
+                      setState(() {
+                        showQuiz = false;
+                      });
+                      context.read<HomeViewModel>().setIndex(2);
+                    },
                   ),
                 ],
               ),
