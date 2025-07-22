@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hive/hive.dart';
-
 import 'package:skin_muse/features/Admin/view/create_post_view.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_cubit.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
 import 'package:skin_muse/features/home/presentation/view/home_view.dart';
 import 'package:skin_muse/features/home/presentation/view_model/home_view_model.dart';
-import 'package:skin_muse/features/auth/data/model/user_hive_model.dart';
 
-class LoginView extends StatelessWidget {
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -99,8 +102,21 @@ class LoginView extends StatelessWidget {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: Color(0xFFA55166),
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscurePassword = !_obscurePassword;
+                                  });
+                                },
+                              ),
                             ),
-                            obscureText: true,
+                            obscureText: _obscurePassword,
                             onChanged: viewModel.setPassword,
                           ),
                           const SizedBox(height: 32),
@@ -108,8 +124,7 @@ class LoginView extends StatelessWidget {
                             onPressed:
                                 state.status == LoginStatus.loading
                                     ? null
-                                    : () async {
-                                      await debugPrintUserId();
+                                    : () {
                                       cubit.login();
                                     },
                             style: ElevatedButton.styleFrom(
@@ -176,26 +191,5 @@ class LoginView extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Future<void> debugPrintUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final sharedId = prefs.getString('userId');
-    final token = prefs.getString('accessToken');
-
-    print("🔍 SharedPreferences:");
-    print("➡️ accessToken: $token");
-    print("➡️ userId: $sharedId");
-
-    final box = await Hive.openBox<UserHiveModel>('userBox');
-    final user = box.get('currentUser');
-
-    print("🔍 Hive:");
-    if (user != null) {
-      print("➡️ userId: ${user.userId}");
-      print("➡️ Full user object: $user");
-    } else {
-      print("⚠️ No user found in Hive under 'currentUser'");
-    }
   }
 }
