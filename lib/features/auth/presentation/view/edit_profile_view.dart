@@ -82,12 +82,9 @@ class _EditProfileViewState extends State<EditProfileView> {
         listener: (context, state) {
           if (state is EditProfileSuccess && state.message.contains("name")) {
             Navigator.of(context).pop();
-            Future.delayed(const Duration(milliseconds: 300), () {
-              Navigator.of(context).pop(_nameController.text);
-            });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Name updated successfully'),
+                content: const Text('Name updated successfully'),
                 backgroundColor: Colors.green,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
@@ -97,6 +94,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                 duration: const Duration(seconds: 3),
               ),
             );
+            setState(() {}); // Refresh UI to reflect new Hive cached name
           } else if (state is EditProfileFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -112,7 +110,6 @@ class _EditProfileViewState extends State<EditProfileView> {
             );
           }
         },
-
         builder: (context, state) {
           final isLoading = state is EditProfileLoading;
           return Column(

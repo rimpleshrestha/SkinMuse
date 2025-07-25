@@ -32,7 +32,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final message = await authRemoteDataSource.updateName(event.name);
       if (message != null) {
         emit(ProfileSuccess(message));
-        // reload user profile after name update
+        // Reload user profile after name update
         add(LoadUserProfile());
       } else {
         emit(ProfileFailure("Failed to update name"));
@@ -100,40 +100,50 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  // 🔹 Fetch user details & update Hive
+  /// Fetch user details & update Hive without unnecessary snackbar errors
   Future<void> _onLoadUserProfile(
     LoadUserProfile event,
     Emitter<ProfileState> emit,
   ) async {
     emit(ProfileLoading());
     try {
+      // Load cached user first
+      final box = Hive.box<UserHiveModel>('users');
+      String cachedName = "User";
+      if (box.isNotEmpty) {
+        final cachedUser = box.getAt(0);
+        if (cachedUser?.name != null && cachedUser!.name!.isNotEmpty) {
+          cachedName = cachedUser.name!;
+        }
+      }
+
+      // Fetch latest profile from API
       final user = await authRemoteDataSource.getProfile();
       if (user != null) {
-        // ✅ Update Hive with fetched name
-        final box = Hive.box<UserHiveModel>('users');
+        // Update Hive with fetched name
         if (box.isNotEmpty) {
           final currentUser = box.getAt(0);
           if (currentUser != null) {
-            final updated = UserHiveModel(
-              userId: currentUser.userId,
-              firstName: currentUser.firstName,
-              lastName: currentUser.lastName,
-              phone: currentUser.phone,
-              profileImage: currentUser.profileImage,
-              email: currentUser.email,
-              username: currentUser.username,
-              password: currentUser.password,
+            final updated = currentUser.copyWith(
               name: user['name'] ?? currentUser.name,
             );
             await box.putAt(0, updated);
           }
         }
-        emit(ProfileLoaded(user['name'] ?? "User"));
+        emit(ProfileLoaded(user['name'] ?? cachedName));
       } else {
-        emit(ProfileFailure("Failed to fetch profile"));
+        // API failed but we have cached name
+        emit(ProfileLoaded(cachedName));
       }
     } catch (e) {
-      emit(ProfileFailure("Error fetching profile: $e"));
+      // On exception, use cached name instead of failure
+      final box = Hive.box<UserHiveModel>('users');
+      if (box.isNotEmpty) {
+        final cachedUser = box.getAt(0);
+        emit(ProfileLoaded(cachedUser?.name ?? "User"));
+      } else {
+        emit(ProfileFailure("Error fetching profile: $e"));
+      }
     }
   }
 }

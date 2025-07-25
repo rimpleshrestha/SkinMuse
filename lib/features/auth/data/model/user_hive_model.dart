@@ -101,4 +101,28 @@ class UserHiveModel extends Equatable {
     password,
     name,
   ];
+
+  UserHiveModel copyWith({
+    String? userId,
+    String? firstName,
+    String? lastName,
+    String? phone,
+    String? profileImage,
+    String? email,
+    String? username,
+    String? password,
+    String? name,
+  }) {
+    return UserHiveModel(
+      userId: userId ?? this.userId,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      phone: phone ?? this.phone,
+      profileImage: profileImage ?? this.profileImage,
+      email: email ?? this.email,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      name: name ?? this.name,
+    );
+  }
 }
