@@ -20,36 +20,39 @@ class _ProductCardState extends State<ProductCard> {
   void initState() {
     super.initState();
     repository = ProductRepository(Dio());
-
-    // Initialize based on backend flag
     isSaved = widget.product['isSaved'] ?? false;
   }
 
-  Future<void> _toggleSave() async {
-    final productId = widget.product['_id']; // ✅ backend uses _id
-    if (productId == null) {
-      debugPrint("❌ No _id found for product: ${widget.product}");
-      return;
-    }
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(fontSize: 16)),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.pink.shade300,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
-    final newState = !isSaved;
-    setState(() {
-      isSaved = newState;
-    });
+  Future<void> _toggleSave() async {
+    final productId = widget.product['_id'];
+    if (productId == null) return;
+
+    setState(() => isSaved = !isSaved);
 
     try {
-      if (newState) {
-        debugPrint("📌 Saving product: $productId");
+      if (isSaved) {
         await repository.saveProduct(productId);
+        _showSnackBar("Product is saved!");
       } else {
-        debugPrint("🗑️ Un-saving product: $productId");
         await repository.unsaveProduct(productId);
+        _showSnackBar("Product is unsaved!");
       }
     } catch (e) {
-      // revert if failed
-      setState(() {
-        isSaved = !newState;
-      });
+      // revert on failure
+      setState(() => isSaved = !isSaved);
       debugPrint("❌ Error saving/unsaving product: $e");
     }
   }
@@ -79,7 +82,6 @@ class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
-
     if (product.isEmpty) return const SizedBox();
 
     return GestureDetector(

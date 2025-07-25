@@ -20,6 +20,8 @@ class ProductModel {
     );
   }
 
+  get skinType => null;
+
   Map<String, dynamic> toJson() {
     return {
       '_id': id,

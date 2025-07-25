@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:skin_muse/features/ProductList/logic/product_bloc.dart';
-import 'package:skin_muse/features/ProductList/logic/product_list_event.dart';
-import 'package:skin_muse/features/ProductList/logic/product_list_state.dart';
-import 'package:skin_muse/features/ProductList/data/product_repository.dart';
+import '../../logic/product_list_event.dart';
+import '../../logic/product_list_state.dart';
+import '../../data/product_repository.dart';
 import 'package:dio/dio.dart';
+import 'package:skin_muse/features/Products/view/product_detail_modal.dart';
 
 class ProductListScreen extends StatelessWidget {
   const ProductListScreen({super.key});
+
+  void _openDetails(BuildContext context, Map<String, dynamic> product) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (_) => DraggableScrollableSheet(
+            expand: false,
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder:
+                (context, scrollController) => ProductDetailModal(
+                  product: product,
+                  scrollController: scrollController,
+                ),
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +68,17 @@ class ProductListScreen extends StatelessWidget {
                 itemCount: state.products.length,
                 itemBuilder: (context, index) {
                   final product = state.products[index];
+                  final productMap = {
+                    "_id": product.id,
+                    "image": product.image,
+                    "title": product.title,
+                    "description": product.description,
+                    "skin_type": product.skinType,
+                    "isSaved": true,
+                  };
+
                   return GestureDetector(
-                    onTap: () {
-                      // open modal or product detail screen if you have one
-                    },
+                    onTap: () => _openDetails(context, productMap),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -57,7 +87,7 @@ class ProductListScreen extends StatelessWidget {
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 4,
-                            offset: const Offset(2, 2),
+                            offset: Offset(2, 2),
                           ),
                         ],
                       ),
@@ -80,7 +110,6 @@ class ProductListScreen extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           ),
                           const SizedBox(height: 8),
