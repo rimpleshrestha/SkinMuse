@@ -32,6 +32,10 @@ class UserHiveModel extends Equatable {
   @HiveField(7)
   final String password;
 
+  // ✅ NEW FIELD
+  @HiveField(8)
+  final String? name;
+
   UserHiveModel({
     String? userId,
     required this.firstName,
@@ -41,10 +45,11 @@ class UserHiveModel extends Equatable {
     required this.email,
     required this.username,
     required this.password,
+    this.name, // ✅ Added
   }) : userId = userId ?? const Uuid().v4();
 
   // Initial empty constructor
-  const UserHiveModel.initial()
+  UserHiveModel.initial()
     : userId = '',
       firstName = '',
       lastName = '',
@@ -52,7 +57,8 @@ class UserHiveModel extends Equatable {
       profileImage = '',
       email = '',
       username = '',
-      password = '';
+      password = '',
+      name = '';
 
   // From Entity
   factory UserHiveModel.fromEntity(UserEntity entity) {
@@ -65,6 +71,7 @@ class UserHiveModel extends Equatable {
       email: entity.email,
       username: entity.username,
       password: entity.password,
+      name: "${entity.firstName} ${entity.lastName}".trim(),
     );
   }
 
@@ -92,5 +99,6 @@ class UserHiveModel extends Equatable {
     email,
     username,
     password,
+    name,
   ];
 }

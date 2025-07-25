@@ -7,8 +7,15 @@ import '../../data/product_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:skin_muse/features/Products/view/product_detail_modal.dart';
 
-class ProductListScreen extends StatelessWidget {
+class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
+
+  @override
+  State<ProductListScreen> createState() => _ProductListScreenState();
+}
+
+class _ProductListScreenState extends State<ProductListScreen> {
+  final Map<String, bool> _saveStates = {}; // productId -> saved state
 
   void _openDetails(BuildContext context, Map<String, dynamic> product) {
     showModalBottomSheet(
@@ -29,6 +36,19 @@ class ProductListScreen extends StatelessWidget {
                   scrollController: scrollController,
                 ),
           ),
+    );
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(fontSize: 16)),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.pink.shade300,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 
@@ -68,13 +88,16 @@ class ProductListScreen extends StatelessWidget {
                 itemCount: state.products.length,
                 itemBuilder: (context, index) {
                   final product = state.products[index];
+                  final productId = product.id;
+                  final isSaved = _saveStates[productId] ?? true;
+
                   final productMap = {
                     "_id": product.id,
                     "image": product.image,
                     "title": product.title,
                     "description": product.description,
                     "skin_type": product.skinType,
-                    "isSaved": true,
+                    "isSaved": isSaved,
                   };
 
                   return GestureDetector(
@@ -83,7 +106,7 @@ class ProductListScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 4,
@@ -95,7 +118,9 @@ class ProductListScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(16),
+                            ),
                             child: Image.network(
                               product.image,
                               height: 120,
@@ -110,6 +135,8 @@ class ProductListScreen extends StatelessWidget {
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -124,13 +151,25 @@ class ProductListScreen extends StatelessWidget {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.favorite, color: Colors.red),
+                            icon: Icon(
+                              isSaved ? Icons.bookmark : Icons.bookmark_border,
+                              color: Colors.pink,
+                            ),
                             onPressed: () {
                               context.read<ProductListBloc>().add(
                                 ToggleSaveProduct(
                                   productId: product.id,
-                                  isSaved: true,
+                                  isSaved: isSaved,
                                 ),
+                              );
+                              setState(() {
+                                _saveStates[productId] = !isSaved;
+                              });
+                              _showSnackBar(
+                                context,
+                                !isSaved
+                                    ? "You saved this product!"
+                                    : "You unsaved this product!",
                               );
                             },
                           ),

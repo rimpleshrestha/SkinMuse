@@ -17,3 +17,13 @@ class ChangePassword extends ProfileEvent {
   });
 }
 
+// 🔹 Existing Events for Rating
+class LoadRating extends ProfileEvent {}
+
+class UpdateRating extends ProfileEvent {
+  final double rating;
+  UpdateRating(this.rating);
+}
+
+// 🔹 New Event for fetching user profile (username, email, etc.)
+class LoadUserProfile extends ProfileEvent {}

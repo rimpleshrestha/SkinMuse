@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
+import 'package:skin_muse/features/auth/data/data_source/remote_datasource/rating_repository.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/profile/profile_bloc.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_bloc.dart';
 
@@ -50,13 +52,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authRemoteDataSource = AuthRemoteDataSource();
+    final ratingRepository = RatingRepository(Dio());
 
     return MultiBlocProvider(
       providers: [
         BlocProvider<LoginCubit>.value(value: loginCubit),
         BlocProvider<ProfileBloc>(
           create:
-              (_) => ProfileBloc(authRemoteDataSource: authRemoteDataSource),
+              (_) => ProfileBloc(
+                authRemoteDataSource: authRemoteDataSource,
+                ratingRepository: ratingRepository,
+              ),
         ),
         BlocProvider<EditProfileBloc>(
           create: (_) => EditProfileBloc(authRemoteDataSource),

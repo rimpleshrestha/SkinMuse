@@ -45,7 +45,7 @@ class LoginCubit extends Cubit<LoginState> {
       await prefs.setString('accessToken', response['accessToken']);
       await prefs.setString('userId', response['_id'] ?? '');
 
-      // Create Hive model
+      // ✅ Create Hive model with name field
       final user = UserHiveModel(
         userId: response['_id'] ?? '',
         firstName: response['firstName'] ?? '',
@@ -55,6 +55,10 @@ class LoginCubit extends Cubit<LoginState> {
         email: response['email'] ?? '',
         username: response['username'] ?? '',
         password: '', // We don't store password
+        name:
+            response['name'] ??
+            "${response['firstName'] ?? ''} ${response['lastName'] ?? ''}"
+                .trim(),
       );
 
       // Save user to Hive

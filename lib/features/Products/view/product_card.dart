@@ -20,7 +20,7 @@ class _ProductCardState extends State<ProductCard> {
   void initState() {
     super.initState();
     repository = ProductRepository(Dio());
-    isSaved = widget.product['isSaved'] ?? false;
+    isSaved = widget.product['isSaved'] ?? false; // initial state from backend
   }
 
   void _showSnackBar(String message) {
@@ -51,8 +51,7 @@ class _ProductCardState extends State<ProductCard> {
         _showSnackBar("Product is unsaved!");
       }
     } catch (e) {
-      // revert on failure
-      setState(() => isSaved = !isSaved);
+      setState(() => isSaved = !isSaved); // revert on failure
       debugPrint("❌ Error saving/unsaving product: $e");
     }
   }
