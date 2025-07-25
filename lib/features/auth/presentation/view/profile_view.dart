@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skin_muse/features/ProductList/presentation/view/product_list_screen.dart';
 import 'package:skin_muse/features/auth/presentation/view/edit_profile_view.dart';
+
 
 class ProfileView extends StatefulWidget {
   final String email;
@@ -148,19 +150,30 @@ class _ProfileViewState extends State<ProfileView> {
                         },
                       ),
                       const SizedBox(height: 30),
-                      Row(
-                        children: const [
-                          Icon(Icons.list, color: Colors.pinkAccent),
-                          SizedBox(width: 10),
-                          Text(
-                            "Your List",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                      // ---- Updated "Your List" Row ----
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ProductListScreen(),
                             ),
-                          ),
-                        ],
+                          );
+                        },
+                        child: Row(
+                          children: const [
+                            Icon(Icons.list, color: Colors.pinkAccent),
+                            SizedBox(width: 10),
+                            Text(
+                              "Your List",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 30),
                       GestureDetector(
@@ -174,6 +187,7 @@ class _ProfileViewState extends State<ProfileView> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
+                                color: Colors.black87,
                               ),
                             ),
                           ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:skin_muse/features/Products/view/product_detail_modal.dart';
+import 'package:skin_muse/features/ProductList/data/product_repository.dart';
+import 'package:dio/dio.dart';
 
 class ProductCard extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -12,12 +14,44 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isSaved = false;
+  late final ProductRepository repository;
 
-  void _toggleSave() {
+  @override
+  void initState() {
+    super.initState();
+    repository = ProductRepository(Dio());
+
+    // Initialize based on backend flag
+    isSaved = widget.product['isSaved'] ?? false;
+  }
+
+  Future<void> _toggleSave() async {
+    final productId = widget.product['_id']; // ✅ backend uses _id
+    if (productId == null) {
+      debugPrint("❌ No _id found for product: ${widget.product}");
+      return;
+    }
+
+    final newState = !isSaved;
     setState(() {
-      isSaved = !isSaved;
+      isSaved = newState;
     });
-    // TODO: Integrate save/unsave logic with backend
+
+    try {
+      if (newState) {
+        debugPrint("📌 Saving product: $productId");
+        await repository.saveProduct(productId);
+      } else {
+        debugPrint("🗑️ Un-saving product: $productId");
+        await repository.unsaveProduct(productId);
+      }
+    } catch (e) {
+      // revert if failed
+      setState(() {
+        isSaved = !newState;
+      });
+      debugPrint("❌ Error saving/unsaving product: $e");
+    }
   }
 
   void _openDetails() {
@@ -46,9 +80,7 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     final product = widget.product;
 
-    if (product.isEmpty) {
-      return const SizedBox();
-    }
+    if (product.isEmpty) return const SizedBox();
 
     return GestureDetector(
       onTap: _openDetails,
