@@ -210,6 +210,8 @@ class _EditProfileViewState extends State<EditProfileView> {
         builder: (context, setModalState) {
           return BlocConsumer<EditProfileBloc, EditProfileState>(
             listener: (context, state) {
+              print('EditProfileBloc state changed: $state'); // DEBUG
+
               if (state is EditProfileSuccess &&
                   state.message.contains("password")) {
                 Navigator.of(context).pop();
@@ -228,6 +230,7 @@ class _EditProfileViewState extends State<EditProfileView> {
             builder: (context, state) {
               final isLoading = state is EditProfileLoading;
               final email = context.read<LoginCubit>().state.user?.email ?? '';
+              print('Change password modal opened for user: $email'); // DEBUG
 
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -324,6 +327,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 final confirm =
                                     _confirmPasswordController.text.trim();
 
+                                print(
+                                  'Change password pressed: current="$current", new="$newPass", confirm="$confirm"',
+                                ); // DEBUG
                                 if (current.isEmpty ||
                                     newPass.isEmpty ||
                                     confirm.isEmpty) {
@@ -343,6 +349,10 @@ class _EditProfileViewState extends State<EditProfileView> {
                                   );
                                   return;
                                 }
+
+                                print(
+                                  'Dispatching ChangePasswordPressed event for email: $email',
+                                ); // DEBUG
 
                                 context.read<EditProfileBloc>().add(
                                   ChangePasswordPressed(

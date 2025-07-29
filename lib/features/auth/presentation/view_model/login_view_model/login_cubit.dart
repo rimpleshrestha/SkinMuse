@@ -44,8 +44,10 @@ class LoginCubit extends Cubit<LoginState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('accessToken', response['accessToken']);
       await prefs.setString('userId', response['_id'] ?? '');
+      // Save role in prefs
+      await prefs.setString('role', response['userRole'] ?? '');
 
-      // ✅ Create Hive model with name field
+      // Create Hive model with role
       final user = UserHiveModel(
         userId: response['_id'] ?? '',
         firstName: response['firstName'] ?? '',
@@ -55,6 +57,7 @@ class LoginCubit extends Cubit<LoginState> {
         email: response['email'] ?? '',
         username: response['username'] ?? '',
         password: '', // We don't store password
+        role: response['userRole'], // <-- new field here
         name:
             response['name'] ??
             "${response['firstName'] ?? ''} ${response['lastName'] ?? ''}"
@@ -90,7 +93,7 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 
-  // ✅ Load user from Hive box at app start
+  // Load user from Hive box at app start
   Future<void> loadUserFromStorage() async {
     final box = Hive.box<UserHiveModel>('users');
     if (box.isNotEmpty) {

@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:skin_muse/features/Admin/view/create_post_view.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skin_muse/features/Admin/view/admin_post_view.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_cubit.dart';
 import 'package:skin_muse/features/auth/presentation/view_model/login_view_model/login_view_model.dart';
 import 'package:skin_muse/features/home/presentation/view/home_view.dart';
@@ -16,6 +18,37 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool _obscurePassword = true;
+
+  // Helper to decode JWT payload and extract user id (no underscore)
+  String? _extractUserIdFromToken(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+      final payload = base64Url.normalize(parts[1]);
+      final decoded = utf8.decode(base64Url.decode(payload));
+      final Map<String, dynamic> payloadMap = jsonDecode(decoded);
+      // Extract 'id' as per your JWT payload
+      return payloadMap['id'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // Optional debug print of JWT payload
+  void debugPrintJwt(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) {
+        print('Invalid JWT token');
+        return;
+      }
+      final payload = base64Url.normalize(parts[1]);
+      final decoded = utf8.decode(base64Url.decode(payload));
+      print('Decoded JWT payload: $decoded');
+    } catch (e) {
+      print('Error decoding JWT: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +67,26 @@ class _LoginViewState extends State<LoginView> {
               child: Consumer<LoginViewModel>(
                 builder: (context, viewModel, _) {
                   return BlocConsumer<LoginCubit, LoginState>(
-                    listener: (context, state) {
+                    listener: (context, state) async {
                       if (state.status == LoginStatus.success) {
+                        final prefs = await SharedPreferences.getInstance();
+                        final token = prefs.getString('accessToken');
+
+                        if (token != null && token.isNotEmpty) {
+                          debugPrintJwt(token);
+                        }
+
+                        final userRole = state.user?.role ?? '';
+                        print('DEBUG: Logged in user role = $userRole');
+
+                        final userIdFromToken =
+                            token != null
+                                ? _extractUserIdFromToken(token)
+                                : null;
+                        print(
+                          'DEBUG: Extracted userId from token: $userIdFromToken',
+                        );
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text("Successfully logged in"),
@@ -43,11 +94,15 @@ class _LoginViewState extends State<LoginView> {
                           ),
                         );
 
-                        if ((state.user?.email ?? '') == 'admin@gmail.com') {
+                        if (userRole == 'admin') {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const CreatePostView(),
+                              builder:
+                                  (_) => AdminPostView(
+                                    userEmail: state.user?.email ?? '',
+                                    userId: userIdFromToken ?? '',
+                                  ),
                             ),
                           );
                         } else {
@@ -107,7 +162,7 @@ class _LoginViewState extends State<LoginView> {
                                   _obscurePassword
                                       ? Icons.visibility_off
                                       : Icons.visibility,
-                                  color: Color(0xFFA55166),
+                                  color: const Color(0xFFA55166),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -124,9 +179,7 @@ class _LoginViewState extends State<LoginView> {
                             onPressed:
                                 state.status == LoginStatus.loading
                                     ? null
-                                    : () {
-                                      cubit.login();
-                                    },
+                                    : () => cubit.login(),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 32,

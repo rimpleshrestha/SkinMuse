@@ -55,11 +55,25 @@ class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
     Emitter<EditProfileState> emit,
   ) async {
     emit(EditProfileLoading());
+
+    // Always get the current logged-in user email from Hive
+    final box = await Hive.openBox<UserHiveModel>('users');
+    final currentUser = box.isNotEmpty ? box.getAt(0) : null;
+
+    if (currentUser == null) {
+      emit(EditProfileFailure('No logged-in user found'));
+      return;
+    }
+
+    final email = currentUser.email;
+    print('Password change requested for: $email'); // Debug
+
     final result = await dataSource.changePassword(
-      event.email,
+      email,
       event.newPassword,
       event.confirmPassword,
     );
+
     if (result != null) {
       emit(EditProfileSuccess(result));
     } else {

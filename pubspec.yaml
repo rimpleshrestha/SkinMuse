@@ -36,6 +36,7 @@ dependencies:
   http: ^1.1.0  # upgraded to resolve conflict with lottie
   google_fonts: ^6.2.1
   jwt_decode: ^0.3.1
+  device_info_plus: ^11.5.0
 
 dev_dependencies:
   flutter_test:

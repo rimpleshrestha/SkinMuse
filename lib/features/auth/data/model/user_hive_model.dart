@@ -32,8 +32,12 @@ class UserHiveModel extends Equatable {
   @HiveField(7)
   final String password;
 
-  // ✅ NEW FIELD
+  // NEW FIELD for role
   @HiveField(8)
+  final String? role;
+
+  // Existing name field
+  @HiveField(9)
   final String? name;
 
   UserHiveModel({
@@ -45,11 +49,12 @@ class UserHiveModel extends Equatable {
     required this.email,
     required this.username,
     required this.password,
-    this.name, // ✅ Added
+    this.role, // new
+    this.name,
   }) : userId = userId ?? const Uuid().v4();
 
   // Initial empty constructor
-  UserHiveModel.initial()
+  const UserHiveModel.initial()
     : userId = '',
       firstName = '',
       lastName = '',
@@ -58,9 +63,10 @@ class UserHiveModel extends Equatable {
       email = '',
       username = '',
       password = '',
+      role = '',
       name = '';
 
-  // From Entity
+  // From Entity - update if your entity supports role
   factory UserHiveModel.fromEntity(UserEntity entity) {
     return UserHiveModel(
       userId: entity.userId,
@@ -71,11 +77,12 @@ class UserHiveModel extends Equatable {
       email: entity.email,
       username: entity.username,
       password: entity.password,
+      role: null, // update if entity has role
       name: "${entity.firstName} ${entity.lastName}".trim(),
     );
   }
 
-  // To Entity
+  // To Entity (update if needed)
   UserEntity toEntity() {
     return UserEntity(
       userId: userId,
@@ -86,6 +93,7 @@ class UserHiveModel extends Equatable {
       email: email,
       username: username,
       password: password,
+      // role: role, // if UserEntity supports role
     );
   }
 
@@ -99,6 +107,7 @@ class UserHiveModel extends Equatable {
     email,
     username,
     password,
+    role,
     name,
   ];
 
@@ -111,6 +120,7 @@ class UserHiveModel extends Equatable {
     String? email,
     String? username,
     String? password,
+    String? role,
     String? name,
   }) {
     return UserHiveModel(
@@ -122,6 +132,7 @@ class UserHiveModel extends Equatable {
       email: email ?? this.email,
       username: username ?? this.username,
       password: password ?? this.password,
+      role: role ?? this.role,
       name: name ?? this.name,
     );
   }
