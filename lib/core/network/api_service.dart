@@ -1,11 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skin_muse/api_config.dart';
+
 
 class ApiService {
-  static final Dio dio = Dio(
+  static Dio? _dio;
+
+  /// Get singleton Dio instance with dynamic baseUrl and interceptor for token
+  static Future<Dio> getDio() async {
+    if (_dio != null) return _dio!;
+
+    final baseUrl = await ApiConfig.baseUrl;
+
+    _dio = Dio(
       BaseOptions(
-        baseUrl:
-            'http://10.0.2.2:3000/api', // For Android Emulator, backend running on port 3000
+        baseUrl: baseUrl,
         connectTimeout: const Duration(seconds: 20),
         receiveTimeout: const Duration(seconds: 20),
         headers: {
@@ -13,8 +22,9 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       ),
-    )
-    ..interceptors.add(
+    );
+
+    _dio!.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final prefs = await SharedPreferences.getInstance();
@@ -27,13 +37,18 @@ class ApiService {
       ),
     );
 
-  /// Register user API call
+    return _dio!;
+  }
+
+  /// Example: register user
   static Future<bool> registerUser({
     required String email,
     required String password,
     required String confirmPassword,
   }) async {
     try {
+      final dio = await getDio();
+
       final response = await dio.post(
         '/signup',
         data: {
@@ -43,16 +58,12 @@ class ApiService {
         },
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        print('Registration successful: ${response.data}');
-        return true;
-      } else {
-        print('Registration failed: ${response.data}');
-        return false;
-      }
+      return response.statusCode == 201 || response.statusCode == 200;
     } catch (e) {
-      print('Error during registration: $e');
+      print('Registration error: $e');
       return false;
     }
   }
+
+  // Add other static API methods here, or just get Dio and use it in repositories.
 }

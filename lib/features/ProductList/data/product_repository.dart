@@ -1,13 +1,23 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skin_muse/api_config.dart';
 import 'package:skin_muse/features/ProductList/data/model/product_model.dart';
+ // Your ApiConfig
 
 class ProductRepository {
   final Dio dio;
 
-  ProductRepository(this.dio) {
-    dio.options.baseUrl = "http://10.0.2.2:3000"; // Android emulator localhost
+  ProductRepository._(this.dio);
+
+  static Future<ProductRepository> create() async {
+    final dio = Dio();
+    final baseUrl = await ApiConfig.baseUrl;
+    dio.options.baseUrl = baseUrl.replaceFirst(
+      '/api',
+      '',
+    ); // remove trailing /api if needed
     dio.options.headers['Content-Type'] = 'application/json';
+    return ProductRepository._(dio);
   }
 
   Future<String?> _getToken() async {
@@ -19,7 +29,7 @@ class ProductRepository {
     final token = await _getToken();
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    final response = await dio.post('/api/post/saved'); // <-- fixed endpoint
+    final response = await dio.post('/api/post/saved');
     final data = response.data['savedPosts'] as List;
     return data.map((e) => ProductModel.fromJson(e)).toList();
   }
@@ -28,13 +38,13 @@ class ProductRepository {
     final token = await _getToken();
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    await dio.post('/api/post/save/$id'); // <-- fixed endpoint
+    await dio.post('/api/post/save/$id');
   }
 
   Future<void> unsaveProduct(String id) async {
     final token = await _getToken();
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    await dio.delete('/api/post/unsave/$id'); // <-- fixed endpoint
+    await dio.delete('/api/post/unsave/$id');
   }
 }

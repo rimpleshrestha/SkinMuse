@@ -95,15 +95,24 @@ class _ProfileViewState extends State<ProfileView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.pink[100],
-                    child: const Icon(
-                      Icons.person,
-                      size: 60,
-                      color: Colors.white,
+
+                  // Updated: Pink circle background with icon.png centered, NOT clipped inside circle
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.pink[100],
+                    ),
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      'assets/icon.png',
+                      fit: BoxFit.contain,
+                      width: 80,
+                      height: 80,
                     ),
                   ),
+
                   const SizedBox(height: 10),
                   Text(
                     userName,

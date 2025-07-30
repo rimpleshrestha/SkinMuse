@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:skin_muse/api_config.dart';
 import 'package:skin_muse/features/Products/view/product_view.dart';
 
 class AdminPostView extends StatefulWidget {
@@ -49,8 +50,9 @@ class _AdminPostViewState extends State<AdminPostView> {
         return;
       }
 
+      final baseUrl = await ApiConfig.baseUrl;
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:3000/api/post"),
+        Uri.parse("$baseUrl/post"),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -82,10 +84,11 @@ class _AdminPostViewState extends State<AdminPostView> {
       return;
     }
 
+    final baseUrl = await ApiConfig.baseUrl;
     final uri =
         _editingPostId == null
-            ? Uri.parse("http://10.0.2.2:3000/api/post")
-            : Uri.parse("http://10.0.2.2:3000/api/post/$_editingPostId");
+            ? Uri.parse("$baseUrl/post")
+            : Uri.parse("$baseUrl/post/$_editingPostId");
 
     final data = jsonEncode({
       'title': _titleController.text,
@@ -129,7 +132,9 @@ class _AdminPostViewState extends State<AdminPostView> {
       return;
     }
 
-    final uri = Uri.parse("http://10.0.2.2:3000/api/post/$id");
+    final baseUrl = await ApiConfig.baseUrl;
+    final uri = Uri.parse("$baseUrl/post/$id");
+
     try {
       final response = await http.delete(
         uri,
@@ -164,6 +169,25 @@ class _AdminPostViewState extends State<AdminPostView> {
       _imageUrlController.clear();
       _skinType = null;
     });
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    debugPrint("🔒 Admin logged out, shared prefs cleared");
+
+    if (mounted) {
+      Navigator.of(context).pop(); // remove dialog
+      Navigator.of(context).pushReplacementNamed('/login');
+    }
   }
 
   Widget _buildInput(String label, TextEditingController controller) {
@@ -282,6 +306,8 @@ class _AdminPostViewState extends State<AdminPostView> {
                       child: const Text("Cancel Edit"),
                     ),
                   const SizedBox(height: 16),
+
+                  // Button: Go to Product View
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -306,56 +332,159 @@ class _AdminPostViewState extends State<AdminPostView> {
                       ),
                     ),
                   ),
+
+                  const SizedBox(height: 16),
+
+                  // NEW BUTTON: Admin Panel
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => AdminPanelScreen(
+                                posts: _posts,
+                                adminUserId: widget.userId,
+                                onDelete: _deletePost,
+                                onEdit: _editPost,
+                                refreshPosts: _fetchPosts,
+                              ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueGrey,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Admin Panel",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // NEW BUTTON: Logout for Admin
+                  ElevatedButton(
+                    onPressed: () => _handleLogout(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            // Post List Section
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _posts.length,
-              itemBuilder: (context, index) {
-                final post = _posts[index];
-                final postOwnerId = post['user']?.toString() ?? '';
-                final loggedInUserId = widget.userId;
-
-                // Debug prints to verify matching logic
-                print('post userId: "$postOwnerId"');
-                print('logged in userId: "$loggedInUserId"');
-                print('match: ${postOwnerId == loggedInUserId}');
-
-                return Card(
-                  child: ListTile(
-                    title: Text(post['title'] ?? ''),
-                    subtitle: Text("Skin Type: ${post['skin_type']}"),
-                    trailing:
-                        postOwnerId == loggedInUserId
-                            ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blue,
-                                  ),
-                                  onPressed: () => _editPost(post),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () => _deletePost(post['_id']),
-                                ),
-                              ],
-                            )
-                            : null,
-                  ),
-                );
-              },
-            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// New Admin Panel Screen to show posts list with edit and delete buttons
+class AdminPanelScreen extends StatelessWidget {
+  final List<dynamic> posts;
+  final String adminUserId;
+  final Function(String) onDelete;
+  final Function(Map<String, dynamic>) onEdit;
+  final Future<void> Function() refreshPosts;
+
+  const AdminPanelScreen({
+    super.key,
+    required this.posts,
+    required this.adminUserId,
+    required this.onDelete,
+    required this.onEdit,
+    required this.refreshPosts,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Admin Panel - Posts"),
+        backgroundColor: const Color(0xFFA55166),
+      ),
+      body: RefreshIndicator(
+        onRefresh: refreshPosts,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(12),
+          itemCount: posts.length,
+          itemBuilder: (context, index) {
+            final post = posts[index];
+            final postOwnerId = post['user']?.toString() ?? '';
+
+            if (postOwnerId != adminUserId) {
+              // Skip posts not owned by admin user
+              return const SizedBox.shrink();
+            }
+
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: ListTile(
+                title: Text(post['title'] ?? ''),
+                subtitle: Text("Skin Type: ${post['skin_type']}"),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        onEdit(post);
+                        Navigator.pop(context);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder:
+                              (ctx) => AlertDialog(
+                                title: const Text("Confirm Delete"),
+                                content: const Text(
+                                  "Are you sure you want to delete this post?",
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    child: const Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    child: const Text("Delete"),
+                                  ),
+                                ],
+                              ),
+                        );
+                        if (confirmed == true) {
+                          await onDelete(post['_id']);
+                          await refreshPosts();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

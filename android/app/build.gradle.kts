@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         applicationId = "com.rimple.skin_muse.skin_muse"
-        minSdk = flutter.minSdkVersion
+        minSdk = 23    // <-- Set minimum SDK to 23 as required by proximity_sensor plugin
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

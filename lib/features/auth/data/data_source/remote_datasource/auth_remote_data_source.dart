@@ -16,7 +16,8 @@ class AuthRemoteDataSource {
     String confirmPassword,
   ) async {
     try {
-      final res = await ApiService.dio.post(
+      final dio = await ApiService.getDio();
+      final res = await dio.post(
         '/signup',
         data: {
           'email': email,
@@ -33,7 +34,8 @@ class AuthRemoteDataSource {
 
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
-      final res = await ApiService.dio.post(
+      final dio = await ApiService.getDio();
+      final res = await dio.post(
         '/login',
         data: {'email': email, 'password': password},
       );
@@ -46,14 +48,12 @@ class AuthRemoteDataSource {
 
   Future<String?> updateName(String name) async {
     try {
+      final dio = await ApiService.getDio();
       final token = await _getToken();
       if (token != null) {
-        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+        dio.options.headers['Authorization'] = 'Bearer $token';
       }
-      final res = await ApiService.dio.put(
-        '/update-details',
-        data: {'name': name},
-      );
+      final res = await dio.put('/update-details', data: {'name': name});
       return res.data['message'];
     } catch (e) {
       print('Update name error: $e');
@@ -61,19 +61,19 @@ class AuthRemoteDataSource {
     }
   }
 
-  // ✅ FIXED: Use new + confirm password as required by backend
-Future<String?> changePassword(
+  Future<String?> changePassword(
     String email,
     String newPassword,
     String confirmPassword,
   ) async {
     try {
+      final dio = await ApiService.getDio();
       final token = await _getToken();
       if (token != null) {
-        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+        dio.options.headers['Authorization'] = 'Bearer $token';
       }
 
-      final res = await ApiService.dio.put(
+      final res = await dio.put(
         '/change-password',
         data: {
           'email': email,
@@ -88,21 +88,19 @@ Future<String?> changePassword(
     }
   }
 
-
-
-
   Future<String?> uploadProfilePhoto(File file) async {
     try {
+      final dio = await ApiService.getDio();
       final token = await _getToken();
       if (token != null) {
-        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+        dio.options.headers['Authorization'] = 'Bearer $token';
       }
 
       FormData formData = FormData.fromMap({
         'pfp': await MultipartFile.fromFile(file.path),
       });
 
-      final res = await ApiService.dio.put(
+      final res = await dio.put(
         '/update-profile-image',
         data: formData,
         options: Options(headers: {'Content-Type': 'multipart/form-data'}),
@@ -116,11 +114,12 @@ Future<String?> changePassword(
 
   Future<Map<String, dynamic>?> getProfile() async {
     try {
+      final dio = await ApiService.getDio();
       final token = await _getToken();
       if (token != null) {
-        ApiService.dio.options.headers['Authorization'] = 'Bearer $token';
+        dio.options.headers['Authorization'] = 'Bearer $token';
       }
-      final res = await ApiService.dio.get('/me');
+      final res = await dio.get('/me');
       return res.data['user'];
     } catch (e) {
       print('Get profile error: $e');

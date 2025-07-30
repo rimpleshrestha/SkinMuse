@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:skin_muse/features/Products/view/product_detail_modal.dart';
 import 'package:skin_muse/features/ProductList/data/product_repository.dart';
-import 'package:dio/dio.dart';
 
 class ProductCard extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -14,13 +13,22 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   bool isSaved = false;
-  late final ProductRepository repository;
+  ProductRepository? repository;
+  bool isLoadingRepo = true;
 
   @override
   void initState() {
     super.initState();
-    repository = ProductRepository(Dio());
-    isSaved = widget.product['isSaved'] ?? false; // initial state from backend
+
+    ProductRepository.create().then((repo) {
+      if (!mounted) return; // Avoid calling setState if disposed
+      setState(() {
+        repository = repo;
+        isLoadingRepo = false;
+      });
+    });
+
+    isSaved = widget.product['isSaved'] ?? false;
   }
 
   void _showSnackBar(String message) {
@@ -37,6 +45,8 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   Future<void> _toggleSave() async {
+    if (repository == null) return;
+
     final productId = widget.product['_id'];
     if (productId == null) return;
 
@@ -44,10 +54,10 @@ class _ProductCardState extends State<ProductCard> {
 
     try {
       if (isSaved) {
-        await repository.saveProduct(productId);
+        await repository!.saveProduct(productId);
         _showSnackBar("Product is saved!");
       } else {
-        await repository.unsaveProduct(productId);
+        await repository!.unsaveProduct(productId);
         _showSnackBar("Product is unsaved!");
       }
     } catch (e) {
@@ -83,76 +93,79 @@ class _ProductCardState extends State<ProductCard> {
     final product = widget.product;
     if (product.isEmpty) return const SizedBox();
 
+    if (isLoadingRepo) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return GestureDetector(
       onTap: _openDetails,
-      child: SizedBox(
-        height: 280,
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    product['image'] ?? '',
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (context, error, stackTrace) =>
-                            const Icon(Icons.broken_image),
-                  ),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  product['image'] ?? '',
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder:
+                      (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  product['title'] ?? 'No Title',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                product['title'] ?? 'No Title',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
-                const SizedBox(height: 4),
-                Expanded(
-                  child: Text(
-                    product['description'] ?? 'No Description',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Skin: ${product['skin_type'] ?? 'N/A'}",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                product['description'] ?? 'No Description',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      "Skin: ${product['skin_type'] ?? 'N/A'}",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    IconButton(
-                      icon: Icon(
-                        isSaved ? Icons.bookmark : Icons.bookmark_border,
-                        color: Colors.pink,
-                      ),
-                      onPressed: _toggleSave,
-                      splashRadius: 20,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      color: Colors.pink,
+                      size: 20,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    onPressed: _toggleSave,
+                    splashRadius: 20,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 30,
+                      minHeight: 30,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

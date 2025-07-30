@@ -1,7 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_bloc.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_event.dart';
 import 'package:skin_muse/features/auth/presentation/bloc/editprofile/edit_profile_state.dart';
@@ -15,8 +13,6 @@ class EditProfileView extends StatefulWidget {
 }
 
 class _EditProfileViewState extends State<EditProfileView> {
-  File? _image;
-
   final _nameController = TextEditingController();
   final _confirmNameController = TextEditingController();
 
@@ -25,19 +21,6 @@ class _EditProfileViewState extends State<EditProfileView> {
   final _confirmPasswordController = TextEditingController();
 
   final Color lightPink = const Color(0xFFF48FB1);
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() {
-        _image = File(picked.path);
-      });
-      context.read<EditProfileBloc>().add(
-        UpdateProfilePhotoPressed(picked.path),
-      );
-    }
-  }
 
   void _showCenteredModal(Widget child) {
     showDialog(
@@ -210,8 +193,6 @@ class _EditProfileViewState extends State<EditProfileView> {
         builder: (context, setModalState) {
           return BlocConsumer<EditProfileBloc, EditProfileState>(
             listener: (context, state) {
-              print('EditProfileBloc state changed: $state'); // DEBUG
-
               if (state is EditProfileSuccess &&
                   state.message.contains("password")) {
                 Navigator.of(context).pop();
@@ -230,7 +211,6 @@ class _EditProfileViewState extends State<EditProfileView> {
             builder: (context, state) {
               final isLoading = state is EditProfileLoading;
               final email = context.read<LoginCubit>().state.user?.email ?? '';
-              print('Change password modal opened for user: $email'); // DEBUG
 
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -327,9 +307,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 final confirm =
                                     _confirmPasswordController.text.trim();
 
-                                print(
-                                  'Change password pressed: current="$current", new="$newPass", confirm="$confirm"',
-                                ); // DEBUG
                                 if (current.isEmpty ||
                                     newPass.isEmpty ||
                                     confirm.isEmpty) {
@@ -349,10 +326,6 @@ class _EditProfileViewState extends State<EditProfileView> {
                                   );
                                   return;
                                 }
-
-                                print(
-                                  'Dispatching ChangePasswordPressed event for email: $email',
-                                ); // DEBUG
 
                                 context.read<EditProfileBloc>().add(
                                   ChangePasswordPressed(
@@ -407,28 +380,12 @@ class _EditProfileViewState extends State<EditProfileView> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            GestureDetector(
-              onTap: _pickImage,
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        _image != null
-                            ? FileImage(_image!)
-                            : const AssetImage("assets/profile.png")
-                                as ImageProvider,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Update your photo",
-                    style: TextStyle(
-                      color: lightPink,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-                ],
+            Text(
+              "Update your details here!",
+              style: TextStyle(
+                color: lightPink,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
               ),
             ),
             const SizedBox(height: 50),

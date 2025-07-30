@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decode/jwt_decode.dart';
+import 'package:skin_muse/api_config.dart';
+ // Import your ApiConfig here
 
 class ProductDetailModal extends StatefulWidget {
   final Map<String, dynamic> product;
@@ -55,9 +57,11 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
     };
   }
 
+  // Refactor to await ApiConfig.baseUrl
   Future<void> fetchComments() async {
     final postId = widget.product['_id'];
-    final url = Uri.parse('http://10.0.2.2:3000/api/comments/post/$postId');
+    final baseUrl = await ApiConfig.baseUrl;
+    final url = Uri.parse('$baseUrl/comments/post/$postId');
     final headers = await _getAuthHeaders();
 
     final res = await http.get(url, headers: headers);
@@ -74,7 +78,8 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
 
-    final url = Uri.parse('http://10.0.2.2:3000/api/comments/$postId');
+    final baseUrl = await ApiConfig.baseUrl;
+    final url = Uri.parse('$baseUrl/comments/$postId');
     final headers = await _getAuthHeaders();
 
     final res = await http.post(
@@ -94,7 +99,8 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
   }
 
   Future<void> deleteComment(String commentId) async {
-    final url = Uri.parse('http://10.0.2.2:3000/api/comments/$commentId');
+    final baseUrl = await ApiConfig.baseUrl;
+    final url = Uri.parse('$baseUrl/comments/$commentId');
     final headers = await _getAuthHeaders();
 
     final res = await http.delete(url, headers: headers);
@@ -104,7 +110,8 @@ class _ProductDetailModalState extends State<ProductDetailModal> {
   }
 
   Future<void> updateComment(String commentId, String text) async {
-    final url = Uri.parse('http://10.0.2.2:3000/api/comments/$commentId');
+    final baseUrl = await ApiConfig.baseUrl;
+    final url = Uri.parse('$baseUrl/comments/$commentId');
     final headers = await _getAuthHeaders();
 
     final res = await http.put(

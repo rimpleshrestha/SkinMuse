@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skin_muse/api_config.dart';
 import 'package:skin_muse/features/Products/view/product_view.dart';
+// import your ApiConfig
 
 class CreatePostView extends StatefulWidget {
   const CreatePostView({super.key});
@@ -44,7 +46,9 @@ class _CreatePostViewState extends State<CreatePostView> {
     }
     print("✅ Token found and valid");
 
-    final uri = Uri.parse("http://10.0.2.2:3000/api/post"); // ✅ updated port
+    final baseUrl = await ApiConfig.baseUrl;
+    final uri = Uri.parse("$baseUrl/post"); // replaced with ApiConfig
+
     final data = jsonEncode({
       'title': _titleController.text,
       'description': _descriptionController.text,
@@ -90,9 +94,10 @@ class _CreatePostViewState extends State<CreatePostView> {
   Future<void> _testConnection() async {
     print("\n=== TESTING BACKEND CONNECTION ===");
     try {
+      final baseUrl = await ApiConfig.baseUrl;
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:3000"),
-      ); // ✅ updated port
+        Uri.parse(baseUrl), // replaced with ApiConfig
+      );
       print("✅ Connection test successful");
       print("Status: ${response.statusCode}");
       print("Response: ${response.body}");

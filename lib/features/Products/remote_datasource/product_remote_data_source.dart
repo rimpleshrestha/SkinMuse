@@ -10,12 +10,14 @@ class ProductRemoteDataSource {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('accessToken') ?? '';
 
+      final dio = await ApiService.getDio(); // <-- await here
+
       String url = '/post';
       if (skinType != 'all') {
         url += '?type=$skinType';
       }
 
-      final res = await ApiService.dio.get(
+      final res = await dio.get(
         url,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );

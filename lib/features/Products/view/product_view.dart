@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shake/shake.dart';
+import 'package:skin_muse/features/ProductList/presentation/view/product_list_screen.dart';
 
 import 'package:skin_muse/features/Products/product_viewmodel/product_bloc.dart';
 import 'package:skin_muse/features/Products/product_viewmodel/product_event.dart';
 import 'package:skin_muse/features/Products/product_viewmodel/product_model.dart';
 import 'package:skin_muse/features/Products/product_viewmodel/product_state.dart';
 import 'package:skin_muse/features/Products/view/product_card.dart';
+
 
 class ProductView extends StatefulWidget {
   final String skinType;
@@ -17,16 +20,26 @@ class ProductView extends StatefulWidget {
 
 class _ProductViewState extends State<ProductView> {
   late ProductBloc _productBloc;
+  ShakeDetector? _shakeDetector;
 
   @override
   void initState() {
     super.initState();
     _productBloc = ProductBloc();
     _productBloc.add(LoadProductsBySkinType(widget.skinType));
+
+    _shakeDetector = ShakeDetector.autoStart(onPhoneShake: _onShake);
+  }
+
+  void _onShake(ShakeEvent event) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const ProductListScreen()));
   }
 
   @override
   void dispose() {
+    _shakeDetector?.stopListening();
     _productBloc.close();
     super.dispose();
   }
