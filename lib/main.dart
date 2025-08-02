@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:proximity_sensor/proximity_sensor.dart';
+import 'package:skin_muse/features/admin/ViewModel/admin_post_bloc.dart';
 
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/auth_remote_data_source.dart';
 import 'package:skin_muse/features/auth/data/data_source/remote_datasource/rating_repository.dart';
@@ -18,6 +19,8 @@ import 'features/splash/presentation/view/splash_view.dart';
 import 'features/auth/presentation/view/register_view.dart';
 import 'features/auth/presentation/view/login_view.dart';
 import 'features/auth/presentation/view/edit_profile_view.dart';
+
+// <-- Added import for AdminPostBloc
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -132,6 +135,10 @@ class MyApp extends StatelessWidget {
         BlocProvider<EditProfileBloc>(
           create: (_) => EditProfileBloc(authRemoteDataSource),
         ),
+        BlocProvider<AdminPostBloc>(
+          // <-- Added AdminPostBloc here
+          create: (_) => AdminPostBloc(),
+        ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -142,9 +149,10 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginView(),
           '/dashboard': (context) => const HomeView(),
           '/edit-profile': (context) => const EditProfileView(),
+          // Add admin route here if you want:
+          // '/admin': (context) => AdminPostView(userEmail: '', userId: ''),
         },
         builder: (context, child) {
-          // Wrap app content inside ProximityWrapper to get Directionality
           return ProximityWrapper(child: child ?? const SizedBox());
         },
       ),

@@ -96,21 +96,12 @@ class _ProfileViewState extends State<ProfileView> {
                 children: [
                   const SizedBox(height: 20),
 
-                  // Updated: Pink circle background with icon.png centered, NOT clipped inside circle
-                  Container(
+                  // Just the image shown normally, no circle or decoration
+                  Image.asset(
+                    'assets/icon.png',
                     width: 100,
                     height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.pink[100],
-                    ),
-                    alignment: Alignment.center,
-                    child: Image.asset(
-                      'assets/icon.png',
-                      fit: BoxFit.contain,
-                      width: 80,
-                      height: 80,
-                    ),
+                    fit: BoxFit.contain,
                   ),
 
                   const SizedBox(height: 10),
