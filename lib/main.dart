@@ -63,7 +63,7 @@ void main() async {
 class ProximityWrapper extends StatefulWidget {
   final Widget child;
 
-  const ProximityWrapper({required this.child, Key? key}) : super(key: key);
+  const ProximityWrapper({required this.child, super.key});
 
   @override
   State<ProximityWrapper> createState() => _ProximityWrapperState();
@@ -114,11 +114,11 @@ class MyApp extends StatelessWidget {
   final RatingRepository ratingRepository;
 
   const MyApp({
-    Key? key,
+    super.key,
     required this.loginCubit,
     required this.authRemoteDataSource,
     required this.ratingRepository,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

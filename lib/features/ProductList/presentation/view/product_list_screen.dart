@@ -4,7 +4,6 @@ import 'package:skin_muse/features/ProductList/logic/product_bloc.dart';
 import 'package:skin_muse/features/ProductList/logic/product_list_event.dart';
 import 'package:skin_muse/features/ProductList/logic/product_list_state.dart';
 import 'package:skin_muse/features/ProductList/data/product_repository.dart';
-import 'package:dio/dio.dart';
 import 'package:skin_muse/features/Products/view/product_detail_modal.dart';
 
 class ProductListScreen extends StatefulWidget {
